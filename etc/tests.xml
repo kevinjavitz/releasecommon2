@@ -1,0 +1,1975 @@
+<?xml version="1.0"?>
+<tests>
+    <fixtures>
+        <configs>
+            <config>
+                <name>salesigniter_rental/calendar_options/keep_selected_dates</name>
+                <value>1</value>
+            </config>
+        </configs>
+    </fixtures>
+    <testsuite>
+        <id>test1</id>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-10-12 08:00'),
+                        'end_date' => new DateTime('2016-10-14 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-10-12 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-10-14 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-10-19 10:00'),
+                        'end_date' => new DateTime('2016-10-20 12:00'),
+                        'start_date_with_turnover' => new DateTime('2016-10-19 09:00'),
+                        'end_date_with_turnover' => new DateTime('2016-10-20 14:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>3</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-10-07 11:00'),
+                        'end_date' => new DateTime('2016-10-30 12:00'),
+                        'start_date_with_turnover' => new DateTime('2016-10-07 10:00'),
+                        'end_date_with_turnover' => new DateTime('2016-10-30 14:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>4</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\StockManagement</class>
+            <name>getInventoryTable</name>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+            <return variable="inventoryBooked"/>
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    'q' => 1,
+    's' => '2016-10-07 10:00',
+    'e' => '2016-10-12 07:00',
+  ),
+  1 =>
+  array (
+    'q' => 2,
+    's' => '2016-10-12 07:00',
+    'e' => '2016-10-14 10:00',
+  ),
+  2 =>
+  array (
+    'q' => 1,
+    's' => '2016-10-14 10:00',
+    'e' => '2016-10-19 09:00',
+  ),
+  3 =>
+  array (
+    'q' => 2,
+    's' => '2016-10-19 09:00',
+    'e' => '2016-10-20 14:00',
+  ),
+  4 =>
+  array (
+    'q' => 1,
+    's' => '2016-10-20 14:00',
+    'e' => '2016-10-30 14:00',
+  ),
+)
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>5</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateFullDatesBooking</name>
+            <arguments>
+                <![CDATA[
+                    [$inventoryBooked]
+                ]]>
+            </arguments>
+
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    's' => '2016-10-08 08:00',
+    'q' => 1,
+  ),
+  1 =>
+  array (
+    's' => '2016-10-09 08:00',
+    'q' => 1,
+  ),
+  2 =>
+  array (
+    's' => '2016-10-10 08:00',
+    'q' => 1,
+  ),
+  3 =>
+  array (
+    's' => '2016-10-11 09:00',
+    'q' => 1,
+  ),
+  4 =>
+  array (
+    's' => '2016-10-12 08:00',
+    'q' => 2,
+  ),
+  5 =>
+  array (
+    's' => '2016-10-13 08:00',
+    'q' => 2,
+  ),
+  6 =>
+  array (
+    's' => '2016-10-14 08:00',
+    'q' => 1,
+  ),
+  7 =>
+  array (
+    's' => '2016-10-15 08:00',
+    'q' => 1,
+  ),
+  8 =>
+  array (
+    's' => '2016-10-16 08:00',
+    'q' => 1,
+  ),
+  9 =>
+  array (
+    's' => '2016-10-17 08:00',
+    'q' => 1,
+  ),
+  10 =>
+  array (
+    's' => '2016-10-18 09:00',
+    'q' => 1,
+  ),
+  11 =>
+  array (
+    's' => '2016-10-19 08:00',
+    'q' => 1,
+  ),
+  12 =>
+  array (
+    's' => '2016-10-20 08:00',
+    'q' => 1,
+  ),
+  13 =>
+  array (
+    's' => '2016-10-21 08:00',
+    'q' => 1,
+  ),
+  14 =>
+  array (
+    's' => '2016-10-22 08:00',
+    'q' => 1,
+  ),
+  15 =>
+  array (
+    's' => '2016-10-23 08:00',
+    'q' => 1,
+  ),
+  16 =>
+  array (
+    's' => '2016-10-24 08:00',
+    'q' => 1,
+  ),
+  17 =>
+  array (
+    's' => '2016-10-25 09:00',
+    'q' => 1,
+  ),
+  18 =>
+  array (
+    's' => '2016-10-26 08:00',
+    'q' => 1,
+  ),
+  19 =>
+  array (
+    's' => '2016-10-27 08:00',
+    'q' => 1,
+  ),
+  20 =>
+  array (
+    's' => '2016-10-28 08:00',
+    'q' => 1,
+  ),
+  21 =>
+  array (
+    's' => '2016-10-29 08:00',
+    'q' => 1,
+  ))
+                 ]]>
+            </assertion>
+
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testResetInventory</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                <![CDATA[
+                    [122]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testShowInventory</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                    [143]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testRegenerateInventory</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>regenerateInventory</type>
+            <arguments>
+                <![CDATA[
+                    [null]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test3</id>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-10-12 08:00'),
+                        'end_date' => new DateTime('2016-10-14 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-10-12 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-10-14 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test4</id>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Helper\Calendar</class>
+            <name>getSendDate</name>
+            <arguments>
+                [120, new \DateTime('2016-10-12 08:00')]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                new \DateTime('2016-10-12 07:00')
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Helper\Calendar</class>
+            <name>getReturnDate</name>
+            <arguments>
+                [120, new \DateTime('2016-10-12 08:00')]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                new \DateTime('2016-10-12 10:00')
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>2</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>checkIntervalValid</name>
+            <arguments>
+                [120, new \Magento\Framework\DataObject(['start_date' => new \DateTime('2016-10-12 08:00'), 'end_date' => new \DateTime('2016-10-13 10:00'), 'start_date_with_turnover' => new \DateTime('2016-10-12 07:00'), 'end_date_with_turnover' => new \DateTime('2016-10-13 12:00') ]), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                \SalesIgniter\Rental\Model\Product\Stock::BOOKED_DATES_ERROR
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>3</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>checkIntervalValid</name>
+            <arguments>
+                [120, new \Magento\Framework\DataObject(['start_date' => new \DateTime('2016-10-15 08:00'), 'end_date' => new \DateTime('2016-10-16 10:00'), 'start_date_with_turnover' => new \DateTime('2016-10-15 07:00'), 'end_date_with_turnover' => new \DateTime('2016-10-16 12:00') ]), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                \SalesIgniter\Rental\Model\Product\Stock::START_DATE_DISABLED_ERROR
+                 ]]>
+            </assertion>
+
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test4</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+                <product>
+                    <id>120</id>
+                    <sirent_turnover_before>3d</sirent_turnover_before>
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Helper\Calendar</class>
+            <name>getSendDate</name>
+            <arguments>
+                [120, new \DateTime('2016-10-12 08:00')]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                new \DateTime('2016-10-12 07:00')
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Helper\Calendar</class>
+            <name>getReturnDate</name>
+            <arguments>
+                [120, new \DateTime('2016-10-12 08:00')]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                new \DateTime('2016-10-12 10:00')
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>2</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>checkIntervalValid</name>
+            <arguments>
+                [120, new \Magento\Framework\DataObject(['start_date' => new \DateTime('2016-10-12 08:00'), 'end_date' => new \DateTime('2016-10-13 10:00'), 'start_date_with_turnover' => new \DateTime('2016-10-12 07:00'), 'end_date_with_turnover' => new \DateTime('2016-10-13 12:00') ]), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                \SalesIgniter\Rental\Model\Product\Stock::BOOKED_DATES_ERROR
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>3</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>checkIntervalValid</name>
+            <arguments>
+                [120, new \Magento\Framework\DataObject(['start_date' => new \DateTime('2016-10-15 08:00'), 'end_date' => new \DateTime('2016-10-16 10:00'), 'start_date_with_turnover' => new \DateTime('2016-10-15 07:00'), 'end_date_with_turnover' => new \DateTime('2016-10-16 12:00') ]), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                \SalesIgniter\Rental\Model\Product\Stock::START_DATE_DISABLED_ERROR
+                 ]]>
+            </assertion>
+
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test7</id>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-12 08:00'),
+                        'end_date' => new DateTime('2016-11-14 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-12 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-14 10:00'),
+                        'order_id' => 1,
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-16 08:00'),
+                        'end_date' => new DateTime('2016-11-18 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-16 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-18 10:00'),
+                        'order_id' => 2,
+                        'not_check_valid' => 1,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>3</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-13 08:00'),
+                        'end_date' => new DateTime('2016-11-17 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-13 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-17 10:00'),
+                        'not_check_valid' => 1,
+                        'order_id' => 3,
+                        'qty' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>4</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\StockManagement</class>
+            <name>getInventoryTable</name>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+            <return variable="inventoryBooked"/>
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-12 07:00',
+    'e' => '2016-11-13 07:00',
+  ),
+  1 =>
+  array (
+    'q' => 2,
+    's' => '2016-11-13 07:00',
+    'e' => '2016-11-14 10:00',
+  ),
+  2 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-14 10:00',
+    'e' => '2016-11-16 07:00',
+  ),
+  3 =>
+  array (
+    'q' => 2,
+    's' => '2016-11-16 07:00',
+    'e' => '2016-11-17 10:00',
+  ),
+  4 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-17 10:00',
+    'e' => '2016-11-18 10:00',
+  ),
+)
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>5</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-12 08:00'),
+                        'end_date' => new DateTime('2016-11-14 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-12 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-14 10:00'),
+                        'not_check_valid' => 1,
+                        'qty_cancel' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>6</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\StockManagement</class>
+            <name>getInventoryTable</name>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+            <return variable="inventoryBooked"/>
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-13 07:00',
+    'e' => '2016-11-16 07:00',
+  ),
+  1 =>
+  array (
+    'q' => 2,
+    's' => '2016-11-16 07:00',
+    'e' => '2016-11-17 10:00',
+  ),
+  2 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-17 10:00',
+    'e' => '2016-11-18 10:00',
+  ),
+
+)
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>7</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-13 08:00'),
+                        'end_date' => new DateTime('2016-11-17 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-13 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-17 10:00'),
+                        'not_check_valid' => 1,
+                        'qty_cancel' => 1
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>8</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\StockManagement</class>
+            <name>getInventoryTable</name>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+            <return variable="inventoryBooked"/>
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-16 07:00',
+    'e' => '2016-11-18 10:00',
+  ),
+)
+                 ]]>
+            </assertion>
+
+        </test>
+        <test>
+            <id>8</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-15 08:00'),
+                        'end_date' => new DateTime('2016-11-16 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-15 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-16 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 3
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>9</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-09 08:00'),
+                        'end_date' => new DateTime('2016-11-23 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-09 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-23 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 4
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>10</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-14 08:00'),
+                        'end_date' => new DateTime('2016-11-21 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-14 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-21 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 2
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>11</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-15 08:00'),
+                        'end_date' => new DateTime('2016-11-26 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-15 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-26 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 4
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>12</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>updateInventory</name>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'product_id' => 120,
+                        'start_date' => new DateTime('2016-11-06 08:00'),
+                        'end_date' => new DateTime('2016-11-17 08:00'),
+                        'start_date_with_turnover' => new DateTime('2016-11-06 07:00'),
+                        'end_date_with_turnover' => new DateTime('2016-11-17 10:00'),
+                        'not_check_valid' => 1,
+                        'qty' => 4
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>13</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\StockManagement</class>
+            <name>getInventoryTable</name>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+            <return variable="inventoryBooked"/>
+            <assertion type="equal">
+                <![CDATA[
+array (
+  0 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-13 07:00',
+    'e' => '2016-11-16 07:00',
+  ),
+  1 =>
+  array (
+    'q' => 2,
+    's' => '2016-11-16 07:00',
+    'e' => '2016-11-17 10:00',
+  ),
+  2 =>
+  array (
+    'q' => 1,
+    's' => '2016-11-17 10:00',
+    'e' => '2016-11-18 10:00',
+  ),
+
+)
+                 ]]>
+            </assertion>
+
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test8</id>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Helper\Calendar</class>
+            <name>approximateDateFromSetting</name>
+            <arguments>
+                [new \DateTime(), 120]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+new \DateTime('2016-10-14 15:50')
+                 ]]>
+            </assertion>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testPrice</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+                <product>
+                    <id>122</id>
+                    <sirent_turnover_before><![CDATA[
+                        ['3d']
+                    ]]></sirent_turnover_before>
+                    <sirent_buyout_price><![CDATA[
+                        ['300']
+                    ]]></sirent_buyout_price>
+                    <sirent_pricingtype><![CDATA[
+                        ['2']
+                    ]]></sirent_pricingtype>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 40,
+                                    'period' => '1M',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\PriceCalculations</class>
+            <name>calculatePrice</name>
+            <arguments>
+                [122,new \DateTime('2017-10-14 00:00:00'), new DateTime('2017-10-15 00:00:00'), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                   5
+                 ]]>
+            </assertion>
+        </test>
+        <test>
+            <id>1</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\PriceCalculations</class>
+            <name>calculatePrice</name>
+            <arguments>
+                [122,new \DateTime('2017-10-14 00:00:00'), new DateTime('2017-10-16 00:00:00'), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                   10
+                 ]]>
+            </assertion>
+        </test>
+        <test>
+            <id>2</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\PriceCalculations</class>
+            <name>calculatePrice</name>
+            <arguments>
+                [122,new \DateTime('2017-10-14 00:00:00'), new DateTime('2017-10-17 00:00:00'), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                   15
+                 ]]>
+            </assertion>
+        </test>
+        <test>
+            <id>3</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\PriceCalculations</class>
+            <name>calculatePrice</name>
+            <arguments>
+                [122,new \DateTime('2016-10-14 00:00:00'), new DateTime('2016-10-18 00:00:00'), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                   20
+                 ]]>
+            </assertion>
+        </test>
+        <test>
+            <id>4</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\PriceCalculations</class>
+            <name>calculatePrice</name>
+            <arguments>
+                [122,new \DateTime('2016-10-14 00:00:00'), new DateTime('2016-10-19 00:00:00'), 1]
+            </arguments>
+            <assertion type="equal">
+                <![CDATA[
+                   20
+                 ]]>
+            </assertion>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testOrder</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+                <product>
+                    <id>120</id>
+                    <sirent_min><![CDATA[
+                        ['0d']
+                    ]]></sirent_min>
+                    <sirent_quantity><![CDATA[
+                        [5]
+                    ]]></sirent_quantity>
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>deleteOrders</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>createOrder</type>
+            <arguments>
+                [[
+                'product_id' => 120,
+                'qty' => 1,
+                'sirent_product_id' => 120,
+                'calendar_selector' => [
+                'from' => '11/25/2017',
+                'turnover_from' => '11/25/2017',
+                'pricing_from' => '',
+                'to' => '11/28/2017',
+                'turnover_to' => '11/28/2017',
+                'pricing_to' => '',
+                'locale' => 'en_US',
+                ],
+                ]]
+            </arguments>
+            <return variable="orderId"/>
+        </test>
+        <test>
+            <id>7</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+        </test>
+        <!-- <test>
+             <id>8</id>
+             <type>returnOrderItem</type>
+             <arguments>
+                 [[
+                 'order_item_ids' => [$orderItemIds[0]],
+                 'qtys' => [
+                 'qty_returned' => [$orderItemIds[0] => 1]
+                 ]
+                 ]]
+             </arguments>
+         </test>
+         <test>
+             <id>9</id>
+             <type>showInventory</type>
+             <arguments>
+                 <![CDATA[
+                     [120]
+                 ]]>
+             </arguments>
+         </test>-->
+    </testsuite>
+    <testsuite>
+        <id>createOrderEn</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+                <product>
+                    <id>143</id>
+
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>createOrder</type>
+            <arguments>
+                [[
+                'product_id' => 143,
+                'qty' => 1,
+                'sirent_product_id' => 143,
+                'calendar_selector' => [
+                'from' => '10/25/2017',
+                'turnover_from' => '10/25/2017',
+                'pricing_from' => '',
+                'to' => '10/28/2017',
+                'turnover_to' => '10/28/2017',
+                'pricing_to' => '',
+                'locale' => 'en_US',
+                ],
+                ]]
+            </arguments>
+            <return variable="orderId"/>
+        </test>
+        <test>
+            <id>7</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                    [143]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testOrderRo</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+                <product>
+                    <id>120</id>
+                    <sirent_min><![CDATA[
+                        ['0d']
+                    ]]></sirent_min>
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Model\Product\Stock</class>
+            <name>resetInventory</name>
+            <arguments>
+                [120]
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>deleteOrders</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>createOrder</type>
+            <arguments>
+                [[
+                'product_id' => 120,
+                'qty' => 1,
+                'sirent_product_id' => 120,
+                'calendar_selector' => [
+                'from' => '25.11.2017 11:00 am',
+                'turnover_from' => '25.11.2017 11:00 am',
+                'pricing_from' => '',
+                'to' => '25.11.2017 12:00 pm',
+                'turnover_to' => '25.11.2017 12:00 pm',
+                'pricing_to' => '',
+                'locale' => 'ro_RO',
+                ],
+                ]]
+            </arguments>
+            <return variable="orderId"/>
+        </test>
+        <test>
+            <id>3</id>
+            <type>createInvoice</type>
+            <arguments>
+                [$orderId]
+            </arguments>
+        </test>
+        <test>
+            <id>3</id>
+            <type>orderItemIds</type>
+            <arguments>
+                [$orderId]
+            </arguments>
+            <return variable="orderItemIds"/>
+        </test>
+        <test>
+            <id>4</id>
+            <type>createCreditMemo</type>
+            <arguments>
+                [[
+                'order_id' => $orderId,
+                'qtys' => [$orderItemIds[0] => 1]
+                ]]
+            </arguments>
+        </test>
+        <test>
+            <id>5</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>6</id>
+            <type>shipOrderItem</type>
+            <arguments>
+                [[
+                'order_item_ids' => [$orderItemIds[0]],
+                'qtys' => [
+                'qty_shipped' => [$orderItemIds[0] => 1]
+                ]
+                ]]
+            </arguments>
+        </test>
+        <test>
+            <id>7</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                    [120]
+                ]]>
+            </arguments>
+        </test>
+        <!-- <test>
+             <id>8</id>
+             <type>returnOrderItem</type>
+             <arguments>
+                 [[
+                 'order_item_ids' => [$orderItemIds[0]],
+                 'qtys' => [
+                 'qty_returned' => [$orderItemIds[0] => 1]
+                 ]
+                 ]]
+             </arguments>
+         </test>
+         <test>
+             <id>9</id>
+             <type>showInventory</type>
+             <arguments>
+                 <![CDATA[
+                     [120]
+                 ]]>
+             </arguments>
+         </test>-->
+    </testsuite>
+    <testsuite>
+        <id>testProducts</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>-1</id>
+            <type>deleteAllProducts</type>
+            <arguments>
+                <![CDATA[
+                    [
+                     null
+                    ]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>-2</id>
+            <type>createCategory</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                    'id' => 5,
+                    'name' => 'First'
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>-3</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'simple',
+                        'idCategory' => 5,
+                        'price' => 10,
+                        'id' => 150
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>0</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 151
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 152
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>2</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 153
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>3</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 154
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>33</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 155
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>32</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 156
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>34</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 157
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>36</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 158
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+
+        <test>
+            <id>4</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'bundle',
+                        'id' => 160,
+                        'price_type' => 1,
+                        'idCategory' => 5,
+                        'options' => [
+                            'radio' => [
+                                'id' => [
+                                    157 => ['qty' => 2, 'can_change' => 0],
+                                    158 => ['qty' => 2, 'can_change' => 0]
+                                ],
+                                'is_required' => 1
+                                ],
+
+                            'checkbox' => [
+                                'id' => [
+                                    151 => ['qty' => 1, 'can_change' => 1],
+                                    152 => ['qty' => 2, 'can_change' => 1]
+                                ],
+                                'is_required' => 1
+                                ],
+                            'select' => [
+                                'id' => [
+                                    155 => ['qty' => 2, 'can_change' => 1],
+                                    156 => ['qty' => 3, 'can_change' => 1]
+                                ],
+                                'is_required' => 1
+                                ],
+
+                            'multi' => [
+                                'id' => [
+                                    153 => ['qty' => 1, 'can_change' => 1],
+                                    154 => ['qty' => 3, 'can_change' => 1]
+                                ],
+                                'is_required' => 1
+                                ]
+                        ],
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testConfigs</id>
+        <fixtures>
+            <configs>
+            </configs>
+            <products>
+                <product>
+                    <id>160</id>
+                    <sirent_fixed_type><![CDATA[
+                        [['value'=>'radio','store_id' => '0']]
+                    ]]></sirent_fixed_type>
+                    <sirent_fixed_length><![CDATA[
+                        [['value'=>'2d, 5d', 'store_id'=>'1'],['value'=>'3d, 5d', 'store_id'=>'0']]
+                    ]]></sirent_fixed_length> <!-- 2 not prorated 1 prorated-->
+                    <sirent_pricingtype><![CDATA[
+                         [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype><!--1 calendar 5-disabled -->
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type><!-- 0 disabled 1 enabled with grid 2 enabled without grid-->
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times><!-- 1 per product 2 for all -->
+                    <sirent_bundle_price_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_bundle_price_type>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 40,
+                                    'period' => '1M',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+
+                </product>
+                <product>
+                    <id>157</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>158</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>151</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>152</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>153</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>154</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>155</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+                <product>
+                    <id>156</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'0','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                </product>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>none</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testDeleteAllOrders</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>deleteAllOrders</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testDeleteAllProducts</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>deleteAllProducts</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testRemoveAttributes</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>removeProductAttributes</type>
+            <arguments>
+                <![CDATA[
+                    ['siwarehouses_warehouses_ids','shipping_method', 'siwarehouses_warehouses_qtys']
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>removeEavAttributes</type>
+            <arguments>
+                <![CDATA[
+                    ['size']
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>updateHotelModeAll</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>updateHotelMode</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>deleteOrdersIds</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>deleteOrders</type>
+            <arguments>
+                [6]
+            </arguments>
+        </test>
+    </testsuite>
+    <!--
+    add a way to re-update inventory per product.
+    foreach product->get the reservationorder table filtered for thast product->use the reserveOrder->ship and return- without the db updates.
+    -->
+    <testsuite>
+        <id>testResetInventoryAll</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>resetInventoryAll</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testCronReminder</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Cron\SendCustomerReminders</class>
+            <name>execute</name>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testCronOverdue</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>function</type>
+            <class>SalesIgniter\Rental\Cron\SendOverdueReminders</class>
+            <name>execute</name>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>test44</id>
+        <test>
+            <id>0</id>
+            <type>casperjs</type>
+            <page>product-reservation120.html</page>
+            <arguments>
+                <![CDATA[
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+</tests>
+        <!-- casperjs tests should be used for checking js conflicts, if any errors on page,
+        js test I think should be separate. but for fast dev we only need to see if everything works overall.
+        We could check if buttons appear, or if rent button is disabled if no quantity
+        or if some dates are disabled in calendar based on booked dates
+        Since we generate most of the html we could test to see if the calendar appears still with php functions.
+        For now casperjs should be left for last since if all the php functions work correctly,
+        the interface will be just a matter of small changes.
+        the only important test is to check if the page load correctly without any errors.
+        and second will be to check if data is returned, but can be skipped
+        -->

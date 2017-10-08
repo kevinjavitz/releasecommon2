@@ -1,0 +1,278 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2017 SalesIgniter. All rights reserved.
+  ~ See https://rentalbookingsoftware.com/license.html for license details.
+  ~
+  -->
+
+<tests>
+    <fixtures>
+        <configs>
+            <config>
+                <name>salesigniter_rental/calendar_options/keep_selected_dates</name>
+                <value>1</value>
+            </config>
+        </configs>
+    </fixtures>
+    <testsuite>
+        <id>testProducts</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+            <products>
+            </products>
+        </fixtures>
+        <test>
+            <id>-1</id>
+            <type>deleteAllProducts</type>
+            <arguments>
+                <![CDATA[
+                    [
+                     null
+                    ]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>-2</id>
+            <type>createCategory</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                    'id' => 5,
+                    'name' => 'First'
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>0</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 151
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+        <test>
+            <id>1</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'reservation',
+                        'idCategory' => 5,
+                        'price' =>[[
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]],
+                        'id' => 152
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+
+        <test>
+            <id>4</id>
+            <type>createProducts</type>
+            <arguments>
+                <![CDATA[
+                    [[
+                        'type' => 'bundle',
+                        'id' => 160,
+                        'price_type' => 1,
+                        'idCategory' => 5,
+                        'options' => [
+                            'radio1' => [
+                                'id' => [
+                                    151 => ['qty' => 1, 'can_change' => 1],
+                                ],
+                                'is_required' => 0
+                                ],
+                            'radio2' => [
+                                'id' => [
+                                    152 => ['qty' => 1, 'can_change' => 1],
+                                ],
+                                'is_required' => 0
+                                ],
+
+                        ],
+                    ]]
+                ]]>
+            </arguments>
+        </test>
+    </testsuite>
+    <testsuite>
+        <id>testConfigs</id>
+        <fixtures>
+            <configs>
+            </configs>
+            <products>
+                <product>
+                    <id>160</id>
+                    <sirent_fixed_type><![CDATA[
+                        [['value'=>'radio','store_id' => '0']]
+                    ]]></sirent_fixed_type>
+                    <sirent_fixed_length><![CDATA[
+                        [['value'=>'2h', 'store_id'=>'0']]
+                    ]]></sirent_fixed_length> <!-- 2 not prorated 1 prorated-->
+                    <sirent_pricingtype><![CDATA[
+                         [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype><!--1 calendar 5-disabled -->
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type><!-- 0 disabled 1 enabled with grid 2 enabled without grid-->
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_use_times><!-- 1 per product 2 for all -->
+                    <sirent_bundle_price_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_bundle_price_type>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 40,
+                                    'period' => '1M',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+
+                </product>
+
+                <product>
+                    <id>151</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1h',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+                </product>
+                <product>
+                    <id>152</id>
+                    <sirent_quantity><![CDATA[
+                        [['value'=>'3','store_id' => '0']]
+                    ]]></sirent_quantity>
+                    <sirent_rental_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_rental_type>
+                    <sirent_use_times><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_use_times>
+                    <sirent_pricingtype><![CDATA[
+                        [['value'=>'2','store_id' => '0']]
+                    ]]></sirent_pricingtype>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 3,
+                                    'period' => '1h',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+                </product>
+
+            </products>
+        </fixtures>
+        <test>
+            <id>0</id>
+            <type>none</type>
+            <arguments>
+                [null]
+            </arguments>
+        </test>
+    </testsuite>
+</tests>

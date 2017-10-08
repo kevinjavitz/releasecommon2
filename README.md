@@ -1,2 +1,0 @@
-# releasecommon
-Release Common
