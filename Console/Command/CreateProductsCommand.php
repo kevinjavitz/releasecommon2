@@ -328,7 +328,7 @@ class CreateProductsCommand extends Command
             \SalesIgniter\Rental\Model\Product\Type\Sirent::TYPE_RENTAL
         )->setId($idProduct)
             ->setAttributeSetId(4)
-            //->setSirentRentalType(1)
+            ->setSirentRentalType(1)
             //->setSirentUseTimes(1)
             //->setSirentQuantity(1)
             //->setSirentPricingType(2)
@@ -375,7 +375,7 @@ class CreateProductsCommand extends Command
         $stockItem->save();
     }
 
-    private function configurableProductReservation($idProduct, $associatedProductIds, $idCategory)
+    private function configurableProductReservation($idProduct, $idCategory, $associations)
     {
         $eavConfig = $this->eavConfig;
         $attribute = $eavConfig->getAttribute('catalog_product', 'test_configurable');
@@ -411,10 +411,7 @@ class CreateProductsCommand extends Command
                     'used_for_sort_by' => 0,
                     'frontend_label' => ['Test Configurable'],
                     'backend_type' => 'int',
-                    'option' => [
-                        'value' => ['option_0' => ['Option 1'], 'option_1' => ['Option 2']],
-                        'order' => ['option_0' => 1, 'option_1' => 2],
-                    ],
+                    'option' => $associations['attribute']['options'],
                 ]
             );
 
@@ -437,11 +434,11 @@ class CreateProductsCommand extends Command
         array_shift($options); //remove the first option which is empty
         $assocProdId = 0;
         foreach ($options as $option) {
-            $productAssoc = $this->productRepository->getById($associatedProductIds[$assocProdId]);
+            $productAssoc = $this->productRepository->getById($associations['products'][$assocProdId]);
             $productAssoc->setTestConfigurable($option->getValue());
             $productAssoc->save();
             $attributeValues[] = [
-                'label' => 'test',
+                //'label' => $associations['attribute']['name'],
                 'attribute_id' => $attribute->getId(),
                 'value_index' => $option->getValue(),
             ];
@@ -450,6 +447,22 @@ class CreateProductsCommand extends Command
 
         /** @var $product Product */
         $product = $this->productFactory->create();
+
+        $product->setTypeId(Configurable::TYPE_CODE)
+            ->setId($idProduct)
+            ->setAttributeSetId($attributeSetId)
+            ->setWebsiteIds([1])
+            ->setName('Configurable Product'.$idProduct)
+            ->setSku('configurable'.$idProduct)
+            ->setSirentRentalType(1)
+            //->setSirentUseTimes(1)
+            ->setVisibility(Visibility::VISIBILITY_BOTH)
+            ->setStatus(Status::STATUS_ENABLED)
+            ->setCategoryIds(
+                [$idCategory]
+            )
+            ->setStockData(['use_config_manage_stock' => 1, 'is_in_stock' => 1]);
+        $this->productRepository->save($product);
 
         $configurableAttributesData = [
             [
@@ -465,24 +478,9 @@ class CreateProductsCommand extends Command
 
         $extensionConfigurableAttributes = $product->getExtensionAttributes();
         $extensionConfigurableAttributes->setConfigurableProductOptions($configurableOptions);
-        $extensionConfigurableAttributes->setConfigurableProductLinks($associatedProductIds);
+        $extensionConfigurableAttributes->setConfigurableProductLinks($associations['products']);
 
         $product->setExtensionAttributes($extensionConfigurableAttributes);
-
-        $product->setTypeId(Configurable::TYPE_CODE)
-            ->setId($idProduct)
-            ->setAttributeSetId($attributeSetId)
-            ->setWebsiteIds([1])
-            ->setName('Configurable Product'.$idProduct)
-            ->setSku('configurable'.$idProduct)
-            //->setSirentRentalType(1)
-            //->setSirentUseTimes(1)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setCategoryIds(
-                [$idCategory]
-            )
-            ->setStockData(['use_config_manage_stock' => 1, 'is_in_stock' => 1]);
 
         $this->productRepository->save($product);
     }
@@ -559,7 +557,7 @@ class CreateProductsCommand extends Command
             ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
             ->setPriceView(1)
             ->setPriceType(1)
-            //->setSirentRentalType($params['price_type'])
+            ->setSirentRentalType($params['price_type'])
             //->setSirentUseTimes(0)
             ->setPrice(10.0)
             ->setSirentPrice([])
@@ -568,13 +566,9 @@ class CreateProductsCommand extends Command
                 [$idCategory]
             )
             ->setBundleOptionsData(
-
                 $options
-
             )->setBundleSelectionsData(
-
                 $selections
-
             );
         $this->productRepository->save($product);
         if ($product->getBundleOptionsData()) {
@@ -652,6 +646,9 @@ class CreateProductsCommand extends Command
         if ($params['type'] === 'bundle') {
             $this->bundleProductReservation($params['id'], $params['idCategory'], $params);
         }
+        if ($params['type'] === 'configurable') {
+            $this->configurableProductReservation($params['id'], $params['idCategory'], $params['associations']);
+        }
     }
 
     protected function deleteAllProducts()
@@ -693,7 +690,7 @@ class CreateProductsCommand extends Command
         }
 
         foreach ($idProductsConfigurable as $iProduct => $idConfigLinked) {
-            $this->configurableProductReservation($iProduct, $idConfigLinked);
+            $this->configurableProductReservationOnly($iProduct, $idConfigLinked);
         }
 
         foreach ($idProductsReservationBundleOnly as $iProduct => $idBundleLinked) {

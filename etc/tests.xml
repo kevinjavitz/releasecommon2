@@ -312,6 +312,15 @@ array (
                 ]]>
             </arguments>
         </test>
+        <test>
+            <id>9</id>
+            <type>showInventory</type>
+            <arguments>
+                <![CDATA[
+                     [151]
+                 ]]>
+            </arguments>
+        </test>
     </testsuite>
     <testsuite>
         <id>test3</id>

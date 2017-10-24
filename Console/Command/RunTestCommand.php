@@ -175,11 +175,30 @@ class RunTestCommand extends CreateProductsCommand
         }
     }
 
+    protected function removeReservationsByDeletedOrders()
+    {
+        //$this->searchCriteriaBuilder->addFilter('entity_id', 0, 'gt');
+        $criteria = $this->searchCriteriaBuilder->create();
+        $orders = $this->orderRepository->getList($criteria);
+        $ordersIds = [];
+        foreach ($orders->getItems() as $order) {
+            $ordersIds[] = $order->getId();
+        }
+        $this->searchCriteriaBuilder->addFilter('main_table.order_id', $ordersIds, 'nin');
+        $this->searchCriteriaBuilder->addFilter('main_table.order_id', 0, 'gt');
+        $criteria = $this->searchCriteriaBuilder->create();
+        $resorders = $this->reservationOrdersRepository->getList($criteria);
+        foreach ($resorders->getItems() as $resOrder) {
+            $resOrder->delete();
+        }
+    }
+
     /**
      * @param null|array $productIds
      */
     protected function regenerateInventory($productIds = null)
     {
+        $this->removeReservationsByDeletedOrders();
         if ($productIds === null) {
             $productIds = [];
             //if (count($productIds)) {
@@ -624,7 +643,7 @@ class RunTestCommand extends CreateProductsCommand
     private function getXmlAsArray()
     {
         $dom = new \DOMDocument();
-        $xmlFile = __DIR__.'/../../etc/testsProducts2.xml';
+        $xmlFile = __DIR__.'/../../etc/tests.xml';
         $dom->loadXML(file_get_contents($xmlFile));
         $root = $dom->documentElement;
         $output = $this->xmlToArray($root);

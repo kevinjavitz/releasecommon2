@@ -10,19 +10,19 @@ use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Shows product name in admin grids instead of product id
+ * Shows product name in admin grids instead of product id.
  */
 class Product extends Column
 {
     /**
-     * Escaper
+     * Escaper.
      *
      * @var \Magento\Framework\Escaper
      */
     protected $escaper;
 
     /**
-     * System store
+     * System store.
      *
      * @var SystemStore
      */
@@ -34,7 +34,7 @@ class Product extends Column
     private $productRepository;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param ContextInterface                                $context
      * @param UiComponentFactory                              $uiComponentFactory
@@ -59,18 +59,19 @@ class Product extends Column
     }
 
     /**
-     * Prepare Data Source
+     * Prepare Data Source.
      *
      * @param array $dataSource
      *
      * @return array
+     *
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
-            foreach ($dataSource['data']['items'] as & $item) {
-                $product = $this->productRepository->getById((int)$item['product_id']);
+            foreach ($dataSource['data']['items'] as &$item) {
+                $product = $this->productRepository->getById((int) $item['product_id']);
                 // backup product_id to product_idbackup in case another column still needs the column id
                 //$item[$this->getData('name') . 'backup'] = $item[$this->getData('name')];
                 $item[$this->getData('name')] = $product->getName();

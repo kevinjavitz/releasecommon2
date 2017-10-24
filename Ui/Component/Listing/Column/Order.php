@@ -9,19 +9,19 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Shows order increment id in admin grids instead of order id
+ * Shows order increment id in admin grids instead of order id.
  */
 class Order extends Column
 {
     /**
-     * Escaper
+     * Escaper.
      *
      * @var \Magento\Framework\Escaper
      */
     protected $escaper;
 
     /**
-     * System store
+     * System store.
      *
      * @var SystemStore
      */
@@ -41,7 +41,7 @@ class Order extends Column
     private $urlBuilder;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param ContextInterface                            $context
      * @param UiComponentFactory                          $uiComponentFactory
@@ -69,7 +69,7 @@ class Order extends Column
     }
 
     /**
-     * Prepare Data Source
+     * Prepare Data Source.
      *
      * @param array $dataSource
      *
@@ -78,15 +78,23 @@ class Order extends Column
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
-            foreach ($dataSource['data']['items'] as & $item) {
-                if ((int)$item[$this->getData('name')] > 0) {
-                    $order = $this->orderRepository->get((int)$item[$this->getData('name')]);
-                    $item[$this->getData('name')] = '<a href="' . $this->urlBuilder->getUrl('sales/order/view', ['order_id' => $order->getId()]) . '">' . $order->getIncrementId() . '</a>';
+            foreach ($dataSource['data']['items'] as &$item) {
+                if ((int) $item[$this->getData('name')] > 0) {
+                    try {
+                        $order = $this->orderRepository->get((int) $item[$this->getData('name')]);
+                        $orderIncrementId = $order->getIncrementId();
+                        $orderId = $order->getId();
+                    } catch (\Exception $e) {
+                        $orderIncrementId = 'deleted order(run regenerateInventory)';
+                        $orderId = '0';
+                    }
+
+                    $item[$this->getData('name')] = '<a href="'.$this->urlBuilder->getUrl('sales/order/view', ['order_id' => $orderId]).'">'.$orderIncrementId.'</a>';
                 } else {
                     $item[$this->getData('name')] = '0';
                 }
                 // backup product_id to product_idbackup in case another column still needs the column id
-                $item[$this->getData('name') . 'backup'] = $item[$this->getData('name')];
+                $item[$this->getData('name').'backup'] = $item[$this->getData('name')];
             }
         }
 
