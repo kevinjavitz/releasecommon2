@@ -210,7 +210,7 @@
                         [['value'=>'1','store_id' => '0']]
                     ]]></sirent_rental_type>
                     <sirent_use_times><![CDATA[
-                        [['value'=>'1','store_id' => '0']]
+                        [['value'=>'3','store_id' => '0']]
                     ]]></sirent_use_times>
                     <sirent_pricingtype><![CDATA[
                         [['value'=>'2','store_id' => '0']]

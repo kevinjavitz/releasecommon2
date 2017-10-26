@@ -643,7 +643,7 @@ class RunTestCommand extends CreateProductsCommand
     private function getXmlAsArray()
     {
         $dom = new \DOMDocument();
-        $xmlFile = __DIR__.'/../../etc/tests.xml';
+        $xmlFile = __DIR__.'/../../etc/testsProducts2.xml';
         $dom->loadXML(file_get_contents($xmlFile));
         $root = $dom->documentElement;
         $output = $this->xmlToArray($root);
@@ -725,12 +725,13 @@ class RunTestCommand extends CreateProductsCommand
                         if ($key === 'sirent_quantity') {
                             $stores = 'any';
                         }
-                        $storeIds = $this->helperRental->getStoreIdsForCurrentWebsite();
+
                         $storeIdsArr = $this->helperRental->getStoreIdsForCurrentWebsite();
                         $storeIdsArr[] = 0;
-                        if ($stores !== 'any') {
+                        if ($stores !== 'any' && $stores !== '0') {
                             $storeIds = [(int) $stores];
                         } else {
+                            $storeIds = $this->helperRental->getStoreIdsForCurrentWebsite();
                             $storeIds[] = 0;
                         }
                         foreach ($storeIdsArr as $storeId) {
