@@ -21,7 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class RunTestCommand extends CreateProductsCommand
 {
     const TEST_ID = 'test_id';
-    const ATTRIBUTE_VALUE = 'attribute_value';
+    const TEST_XML = 'test_xml';
+    //const ATTRIBUTE_VALUE = 'attribute_value';
     /**
      * @var \Magento\Framework\ObjectManagerInterface
      */
@@ -635,15 +636,15 @@ class RunTestCommand extends CreateProductsCommand
     {
         $this->setName('salesigniter:runTest')
             ->setDescription('Run Test')
-            ->addArgument(self::TEST_ID, InputArgument::OPTIONAL, 'Test Id');
-        //->addArgument(self::ATTRIBUTE_VALUE, InputArgument::REQUIRED, 'Attribute Value');
+            ->addArgument(self::TEST_XML, InputArgument::REQUIRED, 'Test XML')
+            ->addArgument(self::TEST_ID, InputArgument::REQUIRED, 'test Id');
         parent::configure();
     }
 
-    private function getXmlAsArray()
+    private function getXmlAsArray($testXml)
     {
         $dom = new \DOMDocument();
-        $xmlFile = __DIR__.'/../../etc/testsProducts2.xml';
+        $xmlFile = __DIR__.'/../../etc/'.$testXml.'.xml';
         $dom->loadXML(file_get_contents($xmlFile));
         $root = $dom->documentElement;
         $output = $this->xmlToArray($root);
@@ -778,27 +779,27 @@ class RunTestCommand extends CreateProductsCommand
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \RuntimeException
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\StateException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('Start here ');
         $this->initMembers();
-
-        $testArray = $this->getXmlAsArray();
-
+        $testXml = $input->getArgument(self::TEST_XML);
         $testId = $input->getArgument(self::TEST_ID);
+        $testArray = $this->getXmlAsArray($testXml);
 
         $this->registry->register('isSecureArea', 'true');
-
         $testSuite = $this->getTests($testArray, 'testsuite', $testId);
         $fixtures = $this->getTests($testArray, 'fixtures');
-        foreach ($testSuite as $suite) {
-            $updated = $this->updateProductsByFixtures($fixtures);
+        $this->updateProductsByFixtures($fixtures);
 
+        foreach ($testSuite as $suite) {
             $tests = $this->getTests($suite, 'test');
             $fixturesTest = $this->getTests($suite, 'fixtures');
-            $updFixtures = $this->updateProductsByFixtures($fixturesTest);
-
+            $this->updateProductsByFixtures($fixturesTest);
             $output->writeln('Executing Tests from suite: '.$suite['id'].' ');
             foreach ($tests as $test) {
                 if ($test['type'] == 'orderItemIds') {
@@ -935,10 +936,11 @@ class RunTestCommand extends CreateProductsCommand
                                 break;
                         }
                     }
-                    $output->writeln('Test: '.$id.' has been executed');
                 }
+                $output->writeln('Test: '.$test['id'].' has been executed');
             }
         }
+
         $this->registry->unregister('isSecureArea');              //unset secure area
     }
 

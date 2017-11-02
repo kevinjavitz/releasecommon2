@@ -15,7 +15,7 @@
         </configs>
     </fixtures>
     <testsuite>
-        <id>testProductsConfigurable</id>
+        <id>testProductsBundle</id>
         <fixtures>
             <configs>
 
@@ -119,26 +119,22 @@
             <arguments>
                 <![CDATA[
                     [[
-                        'type' => 'configurable',
+                        'type' => 'bundle',
                         'id' => 160,
                         'price_type' => 1,
                         'idCategory' => 5,
-                        'associations' => [
-                            'attribute' => [
-                                'options' => [
-                                    'value' => [
-                                            'option_0' => ['Option 1'],
-                                            'option_1' => ['Option 2']
-                                        ],
-                                    'order' => [
-                                            'option_0' => 1,
-                                            'option_1' => 2
-                                        ],
+                        'options' => [
+                            'radio1' => [
+                                'id' => [
+                                    151 => ['qty' => 1, 'can_change' => 0],
                                 ],
-                                'name' => 'testconfig'
+                                'is_required' => 1
                                 ],
-                            'products' => [
-                                151,152
+                            'radio2' => [
+                                'id' => [
+                                    152 => ['qty' => 1, 'can_change' => 0],
+                                ],
+                                'is_required' => 1
                                 ],
 
                         ],
@@ -163,13 +159,51 @@
                     ]]></sirent_fixed_length> <!-- 2 not prorated 1 prorated-->
                     <sirent_pricingtype><![CDATA[
                          [['value'=>'2','store_id' => '0']]
-                    ]]></sirent_pricingtype><!-- 0 disabled 1 enabled with grid 2 enabled without grid-->
+                    ]]></sirent_pricingtype><!--1 calendar 5-disabled -->
                     <sirent_rental_type><![CDATA[
                         [['value'=>'1','store_id' => '0']]
-                    ]]></sirent_rental_type><!--1 calendar 5-disabled -->
+                    ]]></sirent_rental_type><!-- 0 disabled 1 enabled with grid 2 enabled without grid-->
                     <sirent_use_times><![CDATA[
                         [['value'=>'1','store_id' => '0']]
                     ]]></sirent_use_times><!-- 1 per product 2 for all -->
+                    <sirent_bundle_price_type><![CDATA[
+                        [['value'=>'1','store_id' => '0']]
+                    ]]></sirent_bundle_price_type>
+                    <sirent_price><![CDATA[
+                            [[
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 5,
+                                    'period' => '1d',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 20,
+                                    'period' => '1w',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ],
+                                [
+                                    'website_id' => 1,
+                                    'customer_group_id' => \Magento\Customer\Model\Group::CUST_GROUP_ALL,
+                                    'price' => 40,
+                                    'period' => '1M',
+                                    'price_additional' => 0,
+                                    'period_additional' => '',
+                                    'qty_start' => 0,
+                                    'qty_end' => 0,
+                                ]
+                            ]]
+                 ]]></sirent_price>
+
                 </product>
 
                 <product>
@@ -210,7 +244,7 @@
                         [['value'=>'1','store_id' => '0']]
                     ]]></sirent_rental_type>
                     <sirent_use_times><![CDATA[
-                        [['value'=>'3','store_id' => '0']]
+                        [['value'=>'1','store_id' => '0']]
                     ]]></sirent_use_times>
                     <sirent_pricingtype><![CDATA[
                         [['value'=>'2','store_id' => '0']]
