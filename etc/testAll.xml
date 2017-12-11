@@ -1852,7 +1852,7 @@ new \DateTime('2016-10-14 15:50')
             <type>removeProductAttributes</type>
             <arguments>
                 <![CDATA[
-                    ['siwarehouses_warehouses_ids','shipping_method', 'siwarehouses_warehouses_qtys']
+                    ['inventorycenters_warehouses_ids','quote_request_showprice_group','shipping_method','productqtys', 'inventorycenters_warehouses_qtys']
                 ]]>
             </arguments>
         </test>

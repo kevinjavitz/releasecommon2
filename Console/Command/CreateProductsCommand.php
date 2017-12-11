@@ -264,9 +264,10 @@ class CreateProductsCommand extends Command
             'name'
         )->setIsActive(
             true
-        )->setPosition(
-            1
-        )->save();
+        )->setUrlKey('cattt')
+                 ->setPosition(
+                     1
+                 )->save();
     }
 
     /*
@@ -281,17 +282,17 @@ class CreateProductsCommand extends Command
         $product->setTypeId(
             \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE
         )->setId($idProduct)
-            ->setAttributeSetId(4)
+                ->setAttributeSetId(4)
             //->setStoreId(1)
-            ->setWebsiteIds([1])
-            ->setName('Simple Product Igniter'.$idProduct)
-            ->setSku('simple'.$idProduct)
-            ->setPrice($price)
-            ->setWeight(18)
-            ->setStockData(['use_config_manage_stock' => 0])
-            ->setCategoryIds([$idCategory])
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED);
+                ->setWebsiteIds([1])
+                ->setName('Simple Product Igniter'.$idProduct)
+                ->setSku('simple'.$idProduct)
+                ->setPrice($price)
+                ->setWeight(18)
+                ->setStockData(['use_config_manage_stock' => 0])
+                ->setCategoryIds([$idCategory])
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED);
         $this->productRepository->save($product);
         /** @var \Magento\CatalogInventory\Model\Stock\Item $stockItem */
         $stockItem = $this->stockItemFactory->create();
@@ -327,34 +328,36 @@ class CreateProductsCommand extends Command
         $product->setTypeId(
             \SalesIgniter\Rental\Model\Product\Type\Sirent::TYPE_RENTAL
         )->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setSirentRentalType(1)
+                ->setAttributeSetId(4)
+                ->setSirentRentalType(1)
             //->setSirentUseTimes(1)
             //->setSirentQuantity(1)
             //->setSirentPricingType(2)
 
             //->setStoreId(1)
-            ->setWebsiteIds([1])
-            ->setName(
-                'Reservation Product Igniter'.$idProduct
-            )->setSku(
+                ->setWebsiteIds([1])
+                ->setName(
+                    'Reservation Product Igniter'.$idProduct
+                )->setSku(
                 'reservation'.$idProduct
             )->setWeight(
                 18
             )/*->setSize(
                 [['website_id' => 0, 'country' => 'US', 'state' => 0, 'price' => 0, 'delete' => '']]
             )*/
-            ->setShortDescription(
+                ->setShortDescription(
                 'Short description'
             )
-            ->setTaxClassId(0)
-            ->setDescription(
-                'Description with <b>html tag</b>'
-            )->setCategoryIds(
+                ->setTaxClassId(0)
+                ->setDescription(
+                    'Description with <b>html tag</b>'
+                )->setCategoryIds(
                 [$idCategory]
             )->setVisibility(
                 Visibility::VISIBILITY_BOTH
-            )->setStatus(
+            )
+            //->setUrlKey('res'.uniqid())
+                ->setStatus(
                 Status::STATUS_ENABLED
             )->setSirentPrice(
                 $price
@@ -434,7 +437,7 @@ class CreateProductsCommand extends Command
         array_shift($options); //remove the first option which is empty
         $assocProdId = 0;
         foreach ($options as $option) {
-            $productAssoc = $this->productRepository->getById($associations['products'][$assocProdId]);
+            $productAssoc = $this->productRepository->getById($associations['products'][ $assocProdId ]);
             $productAssoc->setTestConfigurable($option->getValue());
             $productAssoc->save();
             $attributeValues[] = [
@@ -449,19 +452,20 @@ class CreateProductsCommand extends Command
         $product = $this->productFactory->create();
 
         $product->setTypeId(Configurable::TYPE_CODE)
-            ->setId($idProduct)
-            ->setAttributeSetId($attributeSetId)
-            ->setWebsiteIds([1])
-            ->setName('Configurable Product'.$idProduct)
-            ->setSku('configurable'.$idProduct)
-            ->setSirentRentalType(1)
+                ->setId($idProduct)
+                ->setAttributeSetId($attributeSetId)
+                ->setWebsiteIds([1])
+                ->setName('Configurable Product'.$idProduct)
+                ->setSku('configurable'.$idProduct)
+                ->setSirentRentalType(1)
+            //->setUrlKey('res'.uniqid())
             //->setSirentUseTimes(1)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setCategoryIds(
-                [$idCategory]
-            )
-            ->setStockData(['use_config_manage_stock' => 1, 'is_in_stock' => 1]);
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setCategoryIds(
+                    [$idCategory]
+                )
+                ->setStockData(['use_config_manage_stock' => 1, 'is_in_stock' => 1]);
         $this->productRepository->save($product);
 
         $configurableAttributesData = [
@@ -547,27 +551,33 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType($params['price_type'])
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+            //->setUrlKey('res'.uniqid())
+                ->setStockData([
+                'use_config_manage_stock' => 1,
+                'qty' => 100,
+                'is_qty_decimal' => 0,
+                'is_in_stock' => 1,
+            ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType($params['price_type'])
             //->setSirentUseTimes(0)
-            ->setPrice(10.0)
-            ->setSirentPrice([])
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$idCategory]
-            )
-            ->setBundleOptionsData(
-                $options
-            )->setBundleSelectionsData(
+                ->setPrice(10.0)
+                ->setSirentPrice([])
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$idCategory]
+                )
+                ->setBundleOptionsData(
+                    $options
+                )->setBundleSelectionsData(
                 $selections
             );
         $this->productRepository->save($product);
@@ -582,8 +592,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -710,36 +720,41 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-
-                    // Required "Radio Buttons" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 2',
-                        'default_title' => 'Option 2',
-                        'type' => 'radio',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+
+                        // Required "Radio Buttons" option
+                        [
+                            'title' => 'Option 2',
+                            'default_title' => 'Option 2',
+                            'type' => 'radio',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -771,8 +786,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -804,36 +819,41 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-
-                    // Required "Checkbox" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 3',
-                        'default_title' => 'Option 3',
-                        'type' => 'checkbox',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+
+                        // Required "Checkbox" option
+                        [
+                            'title' => 'Option 3',
+                            'default_title' => 'Option 3',
+                            'type' => 'checkbox',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -865,8 +885,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -898,36 +918,41 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-
-                    // Required "Multiple Select" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 4',
-                        'default_title' => 'Option 4',
-                        'type' => 'multi',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+
+                        // Required "Multiple Select" option
+                        [
+                            'title' => 'Option 4',
+                            'default_title' => 'Option 4',
+                            'type' => 'multi',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -957,8 +982,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -990,43 +1015,48 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-                    // Required "Checkbox" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 3',
-                        'default_title' => 'Option 3',
-                        'type' => 'checkbox',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Multiple Select" option
-                    [
-                        'title' => 'Option 4',
-                        'default_title' => 'Option 4',
-                        'type' => 'multi',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+                        // Required "Checkbox" option
+                        [
+                            'title' => 'Option 3',
+                            'default_title' => 'Option 3',
+                            'type' => 'checkbox',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Multiple Select" option
+                        [
+                            'title' => 'Option 4',
+                            'default_title' => 'Option 4',
+                            'type' => 'multi',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -1072,8 +1102,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -1105,43 +1135,48 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-                    // Required "Checkbox" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 3',
-                        'default_title' => 'Option 3',
-                        'type' => 'radio',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Multiple Select" option
-                    [
-                        'title' => 'Option 4',
-                        'default_title' => 'Option 4',
-                        'type' => 'multi',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+                        // Required "Checkbox" option
+                        [
+                            'title' => 'Option 3',
+                            'default_title' => 'Option 3',
+                            'type' => 'radio',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Multiple Select" option
+                        [
+                            'title' => 'Option 4',
+                            'default_title' => 'Option 4',
+                            'type' => 'multi',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -1187,8 +1222,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -1220,67 +1255,72 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-                    // Required "Drop-down" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 1',
-                        'default_title' => 'Option 1',
-                        'type' => 'select',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Radio Buttons" option
-                    [
-                        'title' => 'Option 2',
-                        'default_title' => 'Option 2',
-                        'type' => 'radio',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Checkbox" option
-                    [
-                        'title' => 'Option 3',
-                        'default_title' => 'Option 3',
-                        'type' => 'checkbox',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Multiple Select" option
-                    [
-                        'title' => 'Option 4',
-                        'default_title' => 'Option 4',
-                        'type' => 'multi',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Non-required "Multiple Select" option
-                    [
-                        'title' => 'Option 5',
-                        'default_title' => 'Option 5',
-                        'type' => 'multi',
-                        'required' => 0,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+                        // Required "Drop-down" option
+                        [
+                            'title' => 'Option 1',
+                            'default_title' => 'Option 1',
+                            'type' => 'select',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Radio Buttons" option
+                        [
+                            'title' => 'Option 2',
+                            'default_title' => 'Option 2',
+                            'type' => 'radio',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Checkbox" option
+                        [
+                            'title' => 'Option 3',
+                            'default_title' => 'Option 3',
+                            'type' => 'checkbox',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Multiple Select" option
+                        [
+                            'title' => 'Option 4',
+                            'default_title' => 'Option 4',
+                            'type' => 'multi',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Non-required "Multiple Select" option
+                        [
+                            'title' => 'Option 5',
+                            'default_title' => 'Option 5',
+                            'type' => 'multi',
+                            'required' => 0,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -1370,8 +1410,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -1403,67 +1443,72 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(10.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-                    // Required "Drop-down" option
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(10.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
-                        'title' => 'Option 1',
-                        'default_title' => 'Option 1',
-                        'type' => 'select',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Radio Buttons" option
-                    [
-                        'title' => 'Option 2',
-                        'default_title' => 'Option 2',
-                        'type' => 'radio',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Checkbox" option
-                    [
-                        'title' => 'Option 3',
-                        'default_title' => 'Option 3',
-                        'type' => 'checkbox',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Required "Multiple Select" option
-                    [
-                        'title' => 'Option 4',
-                        'default_title' => 'Option 4',
-                        'type' => 'multi',
-                        'required' => 1,
-                        'delete' => '',
-                    ],
-                    // Non-required "Multiple Select" option
-                    [
-                        'title' => 'Option 5',
-                        'default_title' => 'Option 5',
-                        'type' => 'multi',
-                        'required' => 0,
-                        'delete' => '',
-                    ],
-                ]
-            )->setBundleSelectionsData(
+                        // Required "Drop-down" option
+                        [
+                            'title' => 'Option 1',
+                            'default_title' => 'Option 1',
+                            'type' => 'select',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Radio Buttons" option
+                        [
+                            'title' => 'Option 2',
+                            'default_title' => 'Option 2',
+                            'type' => 'radio',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Checkbox" option
+                        [
+                            'title' => 'Option 3',
+                            'default_title' => 'Option 3',
+                            'type' => 'checkbox',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Required "Multiple Select" option
+                        [
+                            'title' => 'Option 4',
+                            'default_title' => 'Option 4',
+                            'type' => 'multi',
+                            'required' => 1,
+                            'delete' => '',
+                        ],
+                        // Non-required "Multiple Select" option
+                        [
+                            'title' => 'Option 5',
+                            'default_title' => 'Option 5',
+                            'type' => 'multi',
+                            'required' => 0,
+                            'delete' => '',
+                        ],
+                    ]
+                )->setBundleSelectionsData(
                 [
                     [
                         [
@@ -1553,8 +1598,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);
@@ -1586,45 +1631,51 @@ class CreateProductsCommand extends Command
         /** @var $product \Magento\Catalog\Model\Product */
         $product = $this->productFactory->create();
         $product->setTypeId(\Magento\Catalog\Model\Product\Type::TYPE_BUNDLE)
-            ->setId($idProduct)
-            ->setAttributeSetId(4)
-            ->setWebsiteIds([1])
-            ->setName('Bundle Product'.$idProduct)
-            ->setSku('bundle-product'.$idProduct)
-            ->setVisibility(Visibility::VISIBILITY_BOTH)
-            ->setStatus(Status::STATUS_ENABLED)
-            ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
-            ->setPriceView(1)
-            ->setPriceType(1)
-            ->setSirentRentalType(1)
-            ->setSirentUseTimes(1)
-            ->setPrice(11.0)
-            ->setShipmentType(0)
-            ->setCategoryIds(
-                [$this->idCategory]
-            )
-            ->setBundleOptionsData(
-                [
-                    [
-                        'title' => 'Bundle Product Items',
-                        'default_title' => 'Bundle Product Items',
-                        'type' => 'select', 'required' => 1,
-                        'delete' => '',
-                    ],
-                ]
-            )
-            ->setBundleSelectionsData(
-                [
+                ->setId($idProduct)
+                ->setAttributeSetId(4)
+                ->setWebsiteIds([1])
+                ->setName('Bundle Product'.$idProduct)
+                ->setSku('bundle-product'.$idProduct)
+                ->setVisibility(Visibility::VISIBILITY_BOTH)
+                ->setStatus(Status::STATUS_ENABLED)
+                ->setStockData([
+                    'use_config_manage_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                ])
+                ->setPriceView(1)
+                ->setPriceType(1)
+                ->setSirentRentalType(1)
+                ->setSirentUseTimes(1)
+                ->setPrice(11.0)
+                ->setShipmentType(0)
+                ->setCategoryIds(
+                    [$this->idCategory]
+                )
+                ->setBundleOptionsData(
                     [
                         [
-                            'product_id' => $idProductsReservationBundle[0],
-                            'selection_qty' => 1,
-                            'selection_can_change_qty' => 1,
+                            'title' => 'Bundle Product Items',
+                            'default_title' => 'Bundle Product Items',
+                            'type' => 'select',
+                            'required' => 1,
                             'delete' => '',
                         ],
-                    ],
-                ]
-            );
+                    ]
+                )
+                ->setBundleSelectionsData(
+                    [
+                        [
+                            [
+                                'product_id' => $idProductsReservationBundle[0],
+                                'selection_qty' => 1,
+                                'selection_can_change_qty' => 1,
+                                'delete' => '',
+                            ],
+                        ],
+                    ]
+                );
 
         if ($product->getBundleOptionsData()) {
             $options = [];
@@ -1637,8 +1688,8 @@ class CreateProductsCommand extends Command
 
                     $links = [];
                     $bundleLinks = $product->getBundleSelectionsData();
-                    if (!empty($bundleLinks[$key])) {
-                        foreach ($bundleLinks[$key] as $linkData) {
+                    if (!empty($bundleLinks[ $key ])) {
+                        foreach ($bundleLinks[ $key ] as $linkData) {
                             if (!(bool) $linkData['delete']) {
                                 $link = $this->linkInterfaceFactory
                                     ->create(['data' => $linkData]);

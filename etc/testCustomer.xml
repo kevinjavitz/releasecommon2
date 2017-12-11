@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<tests>
+    <fixtures>
+        <configs>
+            <config>
+                <name>salesigniter_rental/calendar_options/keep_selected_dates</name>
+                <value>1</value>
+            </config>
+        </configs>
+    </fixtures>
+    <testsuite>
+        <id>customer</id>
+        <fixtures>
+            <configs>
+
+            </configs>
+
+        </fixtures>
+
+        <test>
+            <id>2</id>
+            <type>createCustomer</type>
+            <arguments>
+                null
+            </arguments>
+        </test>
+    </testsuite>
+</tests>
+
