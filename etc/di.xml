@@ -9,6 +9,7 @@
                 <item name="order_delete_command" xsi:type="object">SalesIgniter\Common\Console\Command\OrderDeleteCommand</item>
                 <item name="import_command" xsi:type="object">SalesIgniter\Common\Console\Command\ImportCommand</item>
 -->
+                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>
             </argument>
         </arguments>
     </type>
