@@ -203,6 +203,8 @@ class UninstallRentalUseWithCaution extends Command
         $attributeSetId = $eavSetup->getDefaultAttributeSetId($entityTypeId);
 
         $attributeGroupId = $eavSetup->getAttributeGroupId($entityTypeId, $attributeSetId, 'Rental');
+        $output->writeln("<info>Attribute Set Id is: $attributeSetId</info>");
+        $output->writeln("<info>Attribute Group Id is: $attributeGroupId</info>");
 //        $attributeGroup = $eavSetup->getAttributeGroup($entityTypeId, $attributeSetId, );
 
 //        $output->writeln("<info>Entity Set Id is</info>");
