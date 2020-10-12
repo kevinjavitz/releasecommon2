@@ -71,10 +71,14 @@ class Product extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$item) {
-                $product = $this->productRepository->getById((int) $item['product_id']);
+                try {
+                    $product = $this->productRepository->getById((int) $item['product_id']);
+                    $item[$this->getData('name')] = $product->getName();
+                } catch (\Magento\Framework\Exception\NoSuchEntityException $exception) {
+                    $item[$this->getData('name')] = __('Product Deleted');
+                }
                 // backup product_id to product_idbackup in case another column still needs the column id
                 //$item[$this->getData('name') . 'backup'] = $item[$this->getData('name')];
-                $item[$this->getData('name')] = $product->getName();
             }
         }
 
