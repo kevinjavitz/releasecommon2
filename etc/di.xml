@@ -4,9 +4,10 @@
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>
-                <!-- comment out below if using Magento 2.2 or below -->
-                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>
+                <!-- uncomment below to use CLI testing -->
+<!--                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>-->
+                <!-- uncomment below to use CLI uninstaller -->
+<!--                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>-->
             </argument>
         </arguments>
     </type>
