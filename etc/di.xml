@@ -6,8 +6,8 @@
             <argument name="commands" xsi:type="array">
                 <!-- uncomment below to use CLI testing -->
 <!--                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>-->
-                <!-- uncomment below to use CLI uninstaller -->
-<!--                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>-->
+                <!-- uncomment below to use CLI uninstaller may need to comment this for Magento 2.2.x if there is an error -->
+                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>
             </argument>
         </arguments>
     </type>
