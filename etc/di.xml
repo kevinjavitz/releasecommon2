@@ -5,9 +5,9 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <!-- uncomment below to use CLI testing -->
-<!--                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>-->
+                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>
                 <!-- uncomment below to use CLI uninstaller -->
-<!--                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>-->
+                <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>
             </argument>
         </arguments>
     </type>
