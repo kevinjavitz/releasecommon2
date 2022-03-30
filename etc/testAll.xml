@@ -129,7 +129,7 @@ array (
             <id>5</id>
             <type>function</type>
             <class>SalesIgniter\Rental\Model\Product\Stock</class>
-            <name>updateFullDatesBooking</name>
+            <name>getFullDatesBooking</name>
             <arguments>
                 <![CDATA[
                     [$inventoryBooked]
