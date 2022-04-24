@@ -1,15 +1,17 @@
-# Magento 2 Product Booking and Reservations
+# Magento 2 Rental Product Booking and Reservations
 For more information please visit our web site:
 
-[Magento 2 Booking and Reservation Extension](https://rentalbookingsoftware.com)
+### [Magento 2 Rental Booking and Reservation Extension](https://rentalbookingsoftware.com)
 
-[Features of our On Line Rental Software](https://rentalbookingsoftware.com/rental-features/)
+### [Car Rental Software Industry Use Case](https://rentalbookingsoftware.com/car-motorcycle-and-vehicle-rentals/)
 
-[Pricing](https://rentalbookingsoftware.com/magento-2-rental-booking-module/)
+### [Features of our On Line Rental Software](https://rentalbookingsoftware.com/rental-features/)
 
-[Documentation](https://rentalbookingsoftware.com/docs/quickstart-guide/)
+#### [Pricing](https://rentalbookingsoftware.com/magento-2-rental-booking-module/)
 
-[Screencasts](https://rentalbookingsoftware.com/magento-2-rental-booking-system-screencast-training-videos/)
+#### [Documentation](https://rentalbookingsoftware.com/docs/quickstart-guide/)
 
-[Rental Software Customization Service](https://rentalbookingsoftware.com/custom-project/)
+#### [Screencasts](https://rentalbookingsoftware.com/magento-2-rental-booking-system-screencast-training-videos/)
+
+#### [Rental Software Customization Service](https://rentalbookingsoftware.com/custom-project/)
 
