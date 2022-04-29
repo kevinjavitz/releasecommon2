@@ -1933,7 +1933,7 @@ new \DateTime('2016-10-14 15:50')
         <test>
             <id>0</id>
             <type>function</type>
-            <class>SalesIgniter\Rental\Cron\SendCustomerReminders</class>
+            <class>SalesIgniter\Rental\Cron\SendEmails</class>
             <name>execute</name>
             <arguments>
                 [null]
