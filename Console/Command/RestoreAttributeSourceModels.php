@@ -168,8 +168,6 @@ class RestoreAttributeSourceModels extends Command
         ];
         $this->updateProductEavAttribute($attribute, $multiTypeSettings);
 
-
-
         $attribute = 'sirent_serial_numbers';
         $multiTypeSettings = [
             'backend_model' => 'SalesIgniter\Rental\Model\Attribute\Backend\SerialNumbers',
@@ -181,6 +179,34 @@ class RestoreAttributeSourceModels extends Command
         $multiTypeSettings = [
             'backend_model' => 'SalesIgniter\Rental\Model\Attribute\Backend\SirentBackendConfig',
             'source_model'  =>  'SalesIgniter\Rental\Model\Attribute\Sources\FixedType'
+        ];
+        $this->updateProductEavAttribute($attribute, $multiTypeSettings);
+
+        $attribute = 'sirent_pricingtype';
+        $multiTypeSettings = [
+            'backend_model' => '',
+            'source_model'  =>  'SalesIgniter\Rental\Model\Attribute\Sources\PricingType'
+        ];
+        $this->updateProductEavAttribute($attribute, $multiTypeSettings);
+
+        $attribute = 'sirent_rental_type';
+        $multiTypeSettings = [
+            'backend_model' => '',
+            'source_model'  =>  'SalesIgniter\Rental\Model\Attribute\Sources\RentalType'
+        ];
+        $this->updateProductEavAttribute($attribute, $multiTypeSettings);
+
+        $attribute = 'sirent_bundle_price_type';
+        $multiTypeSettings = [
+            'backend_model' => '',
+            'source_model'  =>  'SalesIgniter\Rental\Model\Attribute\Sources\BundlePriceType'
+        ];
+        $this->updateProductEavAttribute($attribute, $multiTypeSettings);
+
+        $attribute = 'sirent_use_times';
+        $multiTypeSettings = [
+            'backend_model' => '',
+            'source_model'  =>  'SalesIgniter\Rental\Model\Attribute\Sources\UseTimes'
         ];
         $this->updateProductEavAttribute($attribute, $multiTypeSettings);
 
