@@ -237,8 +237,111 @@ class RestoreAttributeSourceModels extends Command
             $this->updateProductEavAttribute($attribute, $multiTypeSettings);
         }
 
+        $attrs = [
+            [
+                'code'          => 'sirent_hour_next_day',
+                'label'         => 'Hour For Next Day',
+                'sort_order'    => 70,
+            ],
+            [
+                'code'          => 'sirent_store_open_time',
+                'label'         => 'Store Open Time',
+                'sort_order'    => 71,
+            ],
+            [
+                'code'          => 'sirent_store_close_time',
+                'label'         => 'Store Close Time',
+                'sort_order'    => 72,
+            ],
+            [
+                'code'          => 'sirent_store_open_monday',
+                'label'         => 'Store Open Time Monday',
+                'sort_order'    => 73,
+            ],
+            [
+                'code'          => 'sirent_store_close_monday',
+                'label'         => 'Store Close Time Monday',
+                'sort_order'    => 74,
+            ],
+            [
+                'code'          => 'sirent_store_open_tuesday',
+                'label'         => 'Store Open Time Tuesday',
+                'sort_order'    => 75,
+            ],
+            [
+                'code'          => 'sirent_store_close_tuesday',
+                'label'         => 'Store Close Time Tuesday',
+                'sort_order'    => 76,
+            ],
+            [
+                'code'          => 'sirent_store_open_wednesday',
+                'label'         => 'Store Open Time Wednesday',
+                'sort_order'    => 77,
+            ],
+            [
+                'code'          => 'sirent_store_close_wednesday',
+                'label'         => 'Store Close Time Wednesday',
+                'sort_order'    => 78,
+            ],
+            [
+                'code'          => 'sirent_store_open_thursday',
+                'label'         => 'Store Open Time Thursday',
+                'sort_order'    => 79,
+            ],
+            [
+                'code'          => 'sirent_store_close_thursday',
+                'label'         => 'Store Close Time Thursday',
+                'sort_order'    => 80,
+            ],
+            [
+                'code'          => 'sirent_store_open_friday',
+                'label'         => 'Store Open Time Friday',
+                'sort_order'    => 81,
+            ],
+            [
+                'code'          => 'sirent_store_close_friday',
+                'label'         => 'Store Close Time Friday',
+                'sort_order'    => 82,
+            ],
+            [
+                'code'          => 'sirent_store_open_saturday',
+                'label'         => 'Store Open Time Saturday',
+                'sort_order'    => 83,
+            ],
+            [
+                'code'          => 'sirent_store_close_saturday',
+                'label'         => 'Store Close Time Saturday',
+                'sort_order'    => 84,
+            ],
+            [
+                'code'          => 'sirent_store_open_sunday',
+                'label'         => 'Store Open Time Sunday',
+                'sort_order'    => 85,
+            ],
+            [
+                'code'          => 'sirent_store_close_sunday',
+                'label'         => 'Store Close Time Sunday',
+                'sort_order'    => 86,
+            ],
+        ];
+
+        foreach ($attrs as $attr) {
+            $this->updateProductEavAttributes([
+                $attr['code'] => [
+                    'apply_to'          => 'sirent,bundle'
+                ]]);
+        }
+
         $output->writeln("<info>Attribute models restored</info>");
 
+    }
+
+    protected function updateProductEavAttributes( $Attributes ) {
+        foreach ( $Attributes as $UpdateKey => $UpdateArr ) {
+            $this->updateProductEavAttribute( $UpdateKey, $UpdateArr );
+        }
+
+        return $this;
     }
 
     protected function updateProductEavAttribute( $AttributeCode, $Updates ) {
