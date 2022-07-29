@@ -105,6 +105,7 @@ class RestoreAttributeSourceModels extends Command
             'sirent_pricepoints',
             'sirent_padding',
             'sirent_min',
+            'sirent_max',
             'sirent_turnover_before',
             'sirent_turnover_after',
             'sirent_future_limit',
