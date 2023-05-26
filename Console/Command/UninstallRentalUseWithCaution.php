@@ -237,6 +237,8 @@ class UninstallRentalUseWithCaution extends Command
         $output->writeln("<info>setup_module Value Deleted</info>");
         $output->writeln("<info>Uninstall complete</info>");
 
+        return 0;
+
     }
 
 

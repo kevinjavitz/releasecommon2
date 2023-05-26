@@ -161,6 +161,8 @@ class RemoveAttributeSourceModels extends Command
 
         $output->writeln("<info>Attribute models removed</info>");
 
+        return 0;
+
     }
 
     protected function updateProductEavAttribute( $AttributeCode, $Updates ) {

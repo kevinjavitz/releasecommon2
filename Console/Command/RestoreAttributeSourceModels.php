@@ -335,6 +335,7 @@ class RestoreAttributeSourceModels extends Command
 
         $output->writeln("<info>Attribute models restored</info>");
 
+        return 0;
     }
 
     protected function updateProductEavAttributes( $Attributes ) {
