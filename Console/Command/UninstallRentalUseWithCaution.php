@@ -20,6 +20,7 @@ use Magento\Framework\App\ResourceConnection;
 class UninstallRentalUseWithCaution extends Command
 {
 
+    public $attributeGroup;
 
     public function __construct(
         CategorySetupFactory $categorySetupFactory,
