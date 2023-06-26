@@ -21,6 +21,10 @@ class UninstallRentalUseWithCaution extends Command
 {
 
     public $attributeGroup;
+    private $categorySetupfactory;
+    private $eavSetupFactory;
+    private $collectionFactory;
+    private $configResource;
 
     public function __construct(
         CategorySetupFactory $categorySetupFactory,

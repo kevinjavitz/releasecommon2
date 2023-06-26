@@ -24,6 +24,13 @@ class RemoveAttributeSourceModels extends Command
 {
 
 
+    private $eavSetup;
+    private $attributeGroup;
+    private $categorySetupfactory;
+    private $eavSetupFactory;
+    private $collectionFactory;
+    private $configResource;
+
     public function __construct(
         CategorySetupFactory $categorySetupFactory,
         ProductAttributeGroupRepositoryInterface $attributeGroup,
