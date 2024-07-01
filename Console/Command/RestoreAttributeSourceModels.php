@@ -30,6 +30,13 @@ class RestoreAttributeSourceModels extends Command
     private $eavSetupFactory;
     private $collectionFactory;
     private $configResource;
+    private $setup;
+    private $objectManager;
+    private $resourceConnection;
+    private $categorySetupFactory;
+    private $attributeRepository;
+    private $attributeSet;
+
 
     public function __construct(
         CategorySetupFactory $categorySetupFactory,
@@ -55,18 +62,6 @@ class RestoreAttributeSourceModels extends Command
         $this->setup = $setup;
         parent::__construct();
     }
-
-    private $categorySetupFactory;
-
-    private $setup;
-
-    private $resourceConnection;
-
-    private $objectManager;
-
-    private $attributeRepository;
-
-    private $attributeSet;
 
     protected function configure()
     {

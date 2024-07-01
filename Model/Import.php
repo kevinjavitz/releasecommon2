@@ -31,6 +31,8 @@ class Import
      */
     private $indexerCollectionFactory;
 
+    private $eavConfig;
+
     /**
      * @param \Magento\Eav\Model\Config $eavConfig
      * @param \Magento\ImportExport\Model\Import $importModel

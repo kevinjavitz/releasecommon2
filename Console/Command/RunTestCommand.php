@@ -32,6 +32,33 @@ class RunTestCommand extends CreateProductsCommand {
 	 */
 	protected $objectManagerFactory;
 
+    public $stockBase;
+
+    public $stock;
+
+    public $creditMemoFactory;
+
+    public $order;
+
+    public $invoiceService;
+
+    public $transaction;
+
+    public $_resource;
+
+    public $deploymentConfig;
+
+    public $helperCalendar;
+
+    public $eavAttribute;
+
+    public $eavSetupFactory;
+
+    public $dataSetup;
+
+    public $helperRental;
+
+
 	/**
 	 * Constructor.
 	 *
