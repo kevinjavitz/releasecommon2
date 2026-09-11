@@ -79,7 +79,7 @@ class RestoreAttributeSourceModels extends Command
      *
      * @return void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
 

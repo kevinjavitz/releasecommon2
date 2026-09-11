@@ -61,7 +61,7 @@ class ImportCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $import = $this->getImportModel();
         if ($input->getOption('images_path')) {
@@ -93,6 +93,7 @@ class ImportCommand extends Command
             $output->writeln("Log trace:");
             $output->writeln($import->getFormattedLogTrace());
         }
+        return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
     }
 
     /**

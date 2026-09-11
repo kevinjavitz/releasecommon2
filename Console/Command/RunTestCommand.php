@@ -843,7 +843,7 @@ class RunTestCommand extends CreateProductsCommand {
 	 * @throws \Magento\Framework\Exception\InputException
 	 * @throws \Magento\Framework\Exception\StateException
 	 */
-	protected function execute( InputInterface $input, OutputInterface $output ) {
+	protected function execute( InputInterface $input, OutputInterface $output ): int {
 		$output->writeln( 'Start here ' );
 		$this->initMembers();
 		$testXml   = $input->getArgument( self::TEST_XML );
@@ -1012,6 +1012,7 @@ class RunTestCommand extends CreateProductsCommand {
 		}
 
 		$this->registry->unregister( 'isSecureArea' );              //unset secure area
+		return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
 	}
 
 	/**
