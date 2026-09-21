@@ -25,6 +25,13 @@ class RestoreAttributeSourceModels extends Command
 
 
     private $eavSetup;
+    /**
+     * EavSetup built from the ModuleDataSetup connection. Declared because assigning it
+     * without a declaration is a dynamic property, deprecated on PHP 8.2+ and fatal on 9.
+     *
+     * @var \Magento\Eav\Setup\EavSetup
+     */
+    private $_eavSetup;
     private $attributeGroup;
     private $categorySetupfactory;
     private $eavSetupFactory;

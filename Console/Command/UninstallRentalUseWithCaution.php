@@ -11,8 +11,11 @@ use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Catalog\Setup\CategorySetupFactory;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Magento\Catalog\Api\ProductAttributeGroupRepositoryInterface;
 use Magento\Config\Model\ResourceModel\Config\Data;
 use Magento\Framework\App\ResourceConnection;
@@ -61,12 +64,67 @@ class UninstallRentalUseWithCaution extends Command
 
     private $attributeSet;
 
+    /**
+     * Option that lets a script skip the confirmation prompt.
+     */
+    public const OPTION_FORCE = 'force';
+
     protected function configure()
     {
         $this->setName('salesigniter:Uninstall');
         $this->setDescription('Caution: Deletes all Sales Igniter Rental product attributes, tables, reservation history.');
+        $this->addOption(
+            self::OPTION_FORCE,
+            'f',
+            InputOption::VALUE_NONE,
+            'Delete everything without asking. Required when the command is not run interactively.'
+        );
 
         parent::configure();
+    }
+
+    /**
+     * Ask before destroying anything.
+     *
+     * This command drops every sirental_* table, including all reservation history, removes
+     * 71 product attributes and deletes the rental store configuration. None of it is
+     * recoverable and none of it used to be confirmed: `bin/magento salesigniter:Uninstall`
+     * on the wrong terminal was enough. So: a prompt when there is a human to ask, and a
+     * refusal when there is not, unless --force says otherwise.
+     *
+     * @return bool True when the caller has confirmed and the command may proceed.
+     */
+    private function isConfirmed(InputInterface $input, OutputInterface $output): bool
+    {
+        if ($input->getOption(self::OPTION_FORCE)) {
+            return true;
+        }
+
+        $output->writeln(
+            '<error>This permanently deletes every Sales Igniter rental product attribute, every'
+            . ' sirental_* table (all reservation, serial number and payment history) and the'
+            . ' rental store configuration. It cannot be undone.</error>'
+        );
+
+        if (!$input->isInteractive()) {
+            $output->writeln(
+                '<error>Refusing to run without confirmation. Re-run with --force if that is'
+                . ' really what you want.</error>'
+            );
+
+            return false;
+        }
+
+        $helperSet = $this->getHelperSet();
+        $question = ($helperSet !== null && $helperSet->has('question'))
+            ? $this->getHelper('question')
+            : new QuestionHelper();
+
+        return (bool)$question->ask(
+            $input,
+            $output,
+            new ConfirmationQuestion('Type "yes" to delete it all: ', false, '/^yes$/i')
+        );
     }
 
     /**
@@ -79,7 +137,11 @@ class UninstallRentalUseWithCaution extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!$this->isConfirmed($input, $output)) {
+            $output->writeln('<info>Aborted. Nothing was deleted.</info>');
 
+            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
+        }
 
         /** @var \Magento\Catalog\Setup\CategorySetup $catalogSetup */
 //        $import = $this->objectManager->create('SalesIgniter\Common\Model\Import');
