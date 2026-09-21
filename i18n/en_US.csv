@@ -1,10 +1,12 @@
-None,None
-Day,Day
-Week,Week
-Month,Month
-Year,Year
-Daily,Daily
-Weekly,Weekly
-Monthly,Monthly
-Yearly,Yearly
-Never,Never
+"Daily","Daily"
+"Day","Day"
+"Month","Month"
+"Monthly","Monthly"
+"Never","Never"
+"None","None"
+"Notified customer about invoice #%1.","Notified customer about invoice #%1."
+"Product Deleted","Product Deleted"
+"Week","Week"
+"Weekly","Weekly"
+"Year","Year"
+"Yearly","Yearly"
