@@ -122,7 +122,8 @@ class RestoreAttributeSourceModels extends Command
             'sirent_fixed_length',
             'sirent_disable_shipping',
             'sirent_single_day_mode',
-            'sirent_excluded_dates'
+            'sirent_excluded_dates',
+            'sirent_minmaxhidecalendar'
         ];
 
         foreach ($attributes as $attribute) {

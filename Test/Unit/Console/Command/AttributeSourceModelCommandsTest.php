@@ -87,25 +87,43 @@ class AttributeSourceModelCommandsTest extends TestCase
         $this->assertSame([], $this->updates, 'no attribute exists, so nothing may be updated');
     }
 
-    public function testRemoveWalksFiftyTwoCodesOfWhichOneIsListedTwice(): void
+    public function testRemoveWalksFiftyThreeCodesOfWhichOneIsListedTwice(): void
     {
-        // Every code exists, so every code is written. The list in the command has 52 entries
-        // and 51 distinct codes: sirent_autoselectstartdate appears twice. Harmless (the
+        // Every code exists, so every code is written. The list in the command has 53 entries
+        // and 52 distinct codes: sirent_autoselectstartdate appears twice. Harmless (the
         // second write is identical) but it is there, and a future edit that "tidies" the list
-        // will show up here.
+        // will show up here. 1.2.56 added sirent_minmaxhidecalendar, the 53rd.
         $this->existingAttributes = ['*'];
 
         (new CommandTester($this->removeCommand()))->execute([]);
 
         $codes = array_column($this->updates, 'code');
 
-        // Two writes (backend_model, source_model) per list entry: 52 entries -> 104 writes.
-        $this->assertCount(104, $this->updates);
-        $this->assertSame(51, count(array_unique($codes)), 'the list has 52 entries but 51 distinct codes');
+        // Two writes (backend_model, source_model) per list entry: 53 entries -> 106 writes.
+        $this->assertCount(106, $this->updates);
+        $this->assertSame(52, count(array_unique($codes)), 'the list has 53 entries but 52 distinct codes');
         $this->assertSame(
             4,
             count(array_keys($codes, 'sirent_autoselectstartdate', true)),
             'sirent_autoselectstartdate is listed twice, so it is written twice per column'
+        );
+    }
+
+    /**
+     * The attribute the list used to miss. Its backend model needs the rental module's DI, so
+     * with SalesIgniter_Rental disabled and this left in place every product page answered 500
+     * ("Cannot instantiate interface ...FixedRentalDatesRepositoryInterface") - measured on a
+     * copy of the dev install, 2026-09-24.
+     */
+    public function testRemoveClearsSirentMinmaxhidecalendar(): void
+    {
+        $this->existingAttributes = ['*'];
+
+        (new CommandTester($this->removeCommand()))->execute([]);
+
+        $this->assertContains(
+            ['code' => 'sirent_minmaxhidecalendar', 'key' => 'backend_model', 'value' => null],
+            $this->updates
         );
     }
 
@@ -162,6 +180,9 @@ class AttributeSourceModelCommandsTest extends TestCase
         return [
             'the plain config-backed ones share one backend model' => [
                 'sirent_hotel_mode', $backend, $ns . 'Backend\SirentBackendConfig',
+            ],
+            'minmaxhidecalendar, added to both lists in 1.2.56' => [
+                'sirent_minmaxhidecalendar', $backend, $ns . 'Backend\SirentBackendConfig',
             ],
             'damage waiver too - the -200 sentinel lives behind this' => [
                 'sirent_damage_waiver', $backend, $ns . 'Backend\SirentBackendConfig',
