@@ -153,8 +153,11 @@ class RemoveAttributeSourceModels extends Command
             'sirent_single_day_mode',
             'sirent_excludeddays_start',
             'sirent_excludeddays_end',
-            'sirent_excludeddays_from'
-
+            'sirent_excludeddays_from',
+            // 1.2.56: missing until now. Its backend (SirentBackendConfig) needs the rental module's
+            // DI, so with the module disabled every product page died on "Cannot instantiate
+            // interface SalesIgniter\Rental\Api\FixedRentalDatesRepositoryInterface".
+            'sirent_minmaxhidecalendar'
         ];
 
 
