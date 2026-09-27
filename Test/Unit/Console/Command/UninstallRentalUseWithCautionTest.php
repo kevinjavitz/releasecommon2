@@ -57,10 +57,6 @@ class UninstallRentalUseWithCautionTest extends TestCase
         ], $this->command()->uninstallOrder());
     }
 
-    /**
-     * @dataProvider invocations
-     */
-    #[\PHPUnit\Framework\Attributes\DataProvider('invocations')]
     public function testRequestForQuoteModulesComeBeforeWhatTheyDependOn(): void
     {
         $modules = $this->createMock(FullModuleList::class);
@@ -71,6 +67,10 @@ class UninstallRentalUseWithCautionTest extends TestCase
         $this->assertSame(['Hyva_SalesIgniterRfq', 'SalesIgniter_RfqRental', 'SalesIgniter_Rfq', 'SalesIgniter_Rental', 'SalesIgniter_Common'], $order);
     }
 
+    /**
+     * @dataProvider invocations
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invocations')]
     public function testItPrintsTheModuleUninstallCommandAndFails(array $input, bool $interactive): void
     {
         $tester = new CommandTester($this->command());
