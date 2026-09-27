@@ -15,7 +15,9 @@ declare(strict_types=1);
  *    Magento's own collector misses) and maps each to itself;
  *  - every other locale translates exactly the en_US phrases: none missing, none left over, none
  *    empty, the same placeholders (%1, %name, {{var}}, HTML tags) and the same leading/trailing
- *    whitespace as the source - the code glues some phrases together.
+ *    whitespace as the source - the code glues some phrases together;
+ *  - brand names are never translated, respelled or declined (Kevin, 2026-09-27; rental master
+ *    had shipped "Sales Igniter" as "Verkaufszünder" in every locale).
  *
  * Adding a phrase to the code therefore means adding it to en_US AND translating it; that is the
  * point. Plain PHP, no Magento classes: runs in the unit suite or on its own.
@@ -42,6 +44,30 @@ abstract class CsvIntegrityTestCase extends TestCase
      *     }
      */
     abstract protected static function moduleRoot(): string;
+
+    /**
+     * Names that stay exactly as written in every language. A phrase containing one must carry it
+     * verbatim, at least as often, in every translation: not translated ("Verkaufszünder"), not
+     * respelled ("Sales-Igniter-Support"), not declined ("Magenta"). Each entry lists the spellings
+     * that count as that brand (the code writes "Hyva", the brand is "Hyvä"). A module can add its
+     * own by overriding brands().
+     */
+    public const BRANDS = [
+        'Sales Igniter' => ['Sales Igniter'],
+        'SalesIgniter' => ['SalesIgniter'],
+        'Magento' => ['Magento'],
+        'Hyvä' => ['Hyvä', 'Hyva'],
+        'Hyva' => ['Hyva', 'Hyvä'],
+        'Luma' => ['Luma'],
+        'Amasty' => ['Amasty'],
+        'rentalbookingsoftware.com' => ['rentalbookingsoftware.com'],
+    ];
+
+    /** @return array<string, string[]> brand => the spellings that count as it */
+    protected static function brands(): array
+    {
+        return self::BRANDS;
+    }
 
     /** @var array<string, array<int, array<int, string|null>>> */
     private static array $parsed = [];
@@ -241,5 +267,37 @@ abstract class CsvIntegrityTestCase extends TestCase
             }
         }
         $this->assertSame([], $bad);
+    }
+
+    /** @return string[] the brands $src names that $tr does not carry verbatim, as often */
+    public static function brandViolations(string $src, string $tr): array
+    {
+        $out = [];
+        foreach (static::brands() as $brand => $spellings) {
+            $want = substr_count($src, $brand);
+            if ($want === 0) {
+                continue;
+            }
+            $have = 0;
+            foreach ($spellings as $spelling) {
+                $have += substr_count($tr, $spelling);
+            }
+            if ($have < $want) {
+                $out[] = $brand;
+            }
+        }
+        return $out;
+    }
+
+    #[DataProvider('translationFiles')]
+    public function testBrandNamesAreNeverTranslated(string $file): void
+    {
+        $bad = [];
+        foreach (self::pairs($file) as $src => $tr) {
+            foreach (static::brandViolations((string) $src, $tr) as $brand) {
+                $bad[] = $brand . ': "' . $src . '" => "' . $tr . '"';
+            }
+        }
+        $this->assertSame([], $bad, 'brand names stay exactly as written in every language');
     }
 }
