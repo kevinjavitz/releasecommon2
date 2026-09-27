@@ -61,6 +61,16 @@ class UninstallRentalUseWithCautionTest extends TestCase
      * @dataProvider invocations
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('invocations')]
+    public function testRequestForQuoteModulesComeBeforeWhatTheyDependOn(): void
+    {
+        $modules = $this->createMock(FullModuleList::class);
+        $modules->method('getNames')->willReturn([
+            'SalesIgniter_Common', 'SalesIgniter_Rental', 'SalesIgniter_Rfq', 'SalesIgniter_RfqRental', 'Hyva_SalesIgniterRfq',
+        ]);
+        $order = (new UninstallRentalUseWithCaution($modules, $this->createMock(ComponentRegistrarInterface::class)))->uninstallOrder();
+        $this->assertSame(['Hyva_SalesIgniterRfq', 'SalesIgniter_RfqRental', 'SalesIgniter_Rfq', 'SalesIgniter_Rental', 'SalesIgniter_Common'], $order);
+    }
+
     public function testItPrintsTheModuleUninstallCommandAndFails(array $input, bool $interactive): void
     {
         $tester = new CommandTester($this->command());

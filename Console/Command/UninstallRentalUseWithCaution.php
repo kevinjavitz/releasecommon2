@@ -122,7 +122,8 @@ class UninstallRentalUseWithCaution extends Command
         $installed = array_values(array_filter(
             $this->fullModuleList->getNames(),
             static function ($name) {
-                return strpos($name, 'SalesIgniter_') === 0 || $name === 'Hyva_SalesIgniterRental';
+                return strpos($name, 'SalesIgniter_') === 0
+                    || in_array($name, ['Hyva_SalesIgniterRental', 'Hyva_SalesIgniterRfq'], true);
             }
         ));
         $addOns = array_reverse(array_values(array_diff($installed, self::CORE_MODULES)));
