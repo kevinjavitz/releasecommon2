@@ -103,15 +103,13 @@ class DateInput
         bool $allowEqual = true
     ): void {
         if ($allowEqual ? $end < $start : $end <= $start) {
+            // Two whole sentences, not one with "on or after" spliced in as an argument: a spliced
+            // English fragment cannot be translated.
+            $args = [$end->format(self::FORMAT_DATETIME), $start->format(self::FORMAT_DATETIME)];
             throw new GraphQlInputException(
-                new Phrase(
-                    'The end date (%1) must be %2 the start date (%3).',
-                    [
-                        $end->format(self::FORMAT_DATETIME),
-                        $allowEqual ? 'on or after' : 'after',
-                        $start->format(self::FORMAT_DATETIME),
-                    ]
-                )
+                $allowEqual
+                    ? new Phrase('The end date (%1) must be on or after the start date (%2).', $args)
+                    : new Phrase('The end date (%1) must be after the start date (%2).', $args)
             );
         }
     }
