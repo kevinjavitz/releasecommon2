@@ -8,13 +8,32 @@ nothing**, prints the `module:uninstall` command and exits 1), `removeAttributes
 **1.2.54 is the minimum for Magento 2.4.9**: below it every `bin/magento` call fatals under Symfony Console 7.
 Owns no database tables (`Setup/` is legacy-style but creates nothing). Default branch `master`.
 
+## Shared code for the other extensions (1.2.57, RFQ Phase 0)
+
+Moved here from releaserental2 so a module that must not require rental (Sales Igniter Request for
+Quote, `salesigniter/releaserfq2`) can use it. releaserental2 keeps a thin subclass under every old
+class name, so its own code, add-ons and generated interceptors are unaffected.
+
+| Here | What | Used by |
+|---|---|---|
+| `Model/License/{Products,Client,AccountLink,Manager}` | the EDD licence client; `Manager` takes `$configPath` / `$flagCode` constructor arguments (defaults: rental's `salesigniter_rental/license/key` and `salesigniter_rental_license`) | rental (subclasses), RFQ (virtual type with its own path and flag) |
+| `Model/Config/Backend/LicenseKey`, `Model/Config/Comment/LicenseKey`, `Block/System/Config/Form/Field/LicenseStatus` | the License settings group; the status block takes `$refreshRoute` / `$refreshParams` for its "Check now" link | rental (subclasses), RFQ |
+| `Controller/Adminhtml/License/Refresh` | `salesigniter_common/license/refresh/section/<section>`: re-checks the manager registered for that config section in its `managers` di argument | RFQ (rental keeps its own route) |
+| `Setup/ModuleRemoval/*` | the `module:uninstall --remove-data` engine (see releaserental2's CLAUDE.md, "Uninstalling") | rental and add-ons (through rental's subclasses), RFQ |
+| `Setup/Patch/GrantsResourceAcl` | trait: grant a new ACL resource to roles that allow something matching a LIKE pattern | RFQ (rental keeps its own `GrantsRentalResourceAcl`) |
+| `Model/GraphQl/{Authorization,Pagination,DateInput}` | GraphQL helpers: ACL gate for admin/integration tokens (`assert`, `assertAny`, `isAllowed`, `isAllowedAny`), page-size/current-page validation, canonical date input | rental (subclasses; rental's `Authorization` keeps its resource constants and lists), RFQ, subscriptions |
+| `Test/Unit/I18n/{PhraseScanner,CsvIntegrityTestCase}` | the i18n checks from rental's `i18n/refresh` branch, as a scanner plus an abstract base a module's `CsvIntegrityTest` extends | RFQ |
+
+`Test/Unit/Setup/ModuleRemoval/{DbSchemaReader,SystemConfigReader}Test` read releaserental2's real
+files through the component registrar and skip where rental is not installed. 138 unit tests.
+
 ## Tests
 
 ```bash
 ddev exec vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist extensions/salesigniter/releasecommon2/Test/Unit
 ```
 
-86 unit tests, no database. **Judge by the `OK` / `FAILURES` line, not the exit status** — every run ends
+138 unit tests (1.2.57), no database. **Judge by the `OK` / `FAILURES` line, not the exit status** — every run ends
 with the same Allure-bootstrap warning the rest of this project has, which alone makes the status 1.
 
 There are no integration tests. Nothing in this module talks to the database except through EAV setup

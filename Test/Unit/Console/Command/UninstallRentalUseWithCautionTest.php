@@ -57,6 +57,16 @@ class UninstallRentalUseWithCautionTest extends TestCase
         ], $this->command()->uninstallOrder());
     }
 
+    public function testRequestForQuoteModulesComeBeforeWhatTheyDependOn(): void
+    {
+        $modules = $this->createMock(FullModuleList::class);
+        $modules->method('getNames')->willReturn([
+            'SalesIgniter_Common', 'SalesIgniter_Rental', 'SalesIgniter_Rfq', 'SalesIgniter_RfqRental', 'Hyva_SalesIgniterRfq',
+        ]);
+        $order = (new UninstallRentalUseWithCaution($modules, $this->createMock(ComponentRegistrarInterface::class)))->uninstallOrder();
+        $this->assertSame(['Hyva_SalesIgniterRfq', 'SalesIgniter_RfqRental', 'SalesIgniter_Rfq', 'SalesIgniter_Rental', 'SalesIgniter_Common'], $order);
+    }
+
     /**
      * @dataProvider invocations
      */
