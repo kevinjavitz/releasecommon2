@@ -72,7 +72,7 @@ class ModuleContractTest extends TestCase
         return $cases;
     }
 
-    public function testTheModuleStillShipsTheSixCommandClassesTheNotesDescribe(): void
+    public function testTheModuleShipsTheseFiveCommandClasses(): void
     {
         $this->assertSame(
             [
@@ -80,7 +80,6 @@ class ModuleContractTest extends TestCase
                 'ImportCommand',
                 'RemoveAttributeSourceModels',
                 'RestoreAttributeSourceModels',
-                'RunTestCommand',
                 'UninstallRentalUseWithCaution',
             ],
             array_map(
@@ -96,7 +95,8 @@ class ModuleContractTest extends TestCase
      * CreateProductsCommand looks like a command and is not one.
      *
      * It has no configure() and no execute(). It is a bag of product-fixture builders that
-     * RunTestCommand extends. The module notes call this out, and the reason it matters is
+     * RunTestCommand extended (RunTestCommand, unregistered, with mass-delete SQL and eval(), and its
+     * etc/testAll.xml were deleted 2026-10-01: DC-01). The module notes call this out, and the reason it matters is
      * that Symfony's Command::execute() THROWS - so if anyone ever adds it to the di.xml
      * command list, `bin/magento` gains an unnamed command and running it explodes.
      *
@@ -133,7 +133,7 @@ class ModuleContractTest extends TestCase
     /* ----------------------------------------------------- di.xml registration */
 
     /**
-     * Three commands registered, RunTestCommand commented out, CreateProductsCommand absent.
+     * Three commands registered, CreateProductsCommand absent.
      *
      */
     #[DataProvider('registeredCommands')]
@@ -159,7 +159,7 @@ class ModuleContractTest extends TestCase
         $this->assertSame(
             ['uninstallRental', 'removeAttributes', 'restoreAttributes'],
             array_keys($this->registeredCommandMap()),
-            'RunTestCommand stays commented out and CreateProductsCommand stays unregistered'
+            'CreateProductsCommand stays unregistered'
         );
     }
 

@@ -4,8 +4,6 @@
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <!-- uncomment below to use CLI testing -->
-<!--                <item name="run_test_command" xsi:type="object">SalesIgniter\Common\Console\Command\RunTestCommand</item>-->
                 <item name="uninstallRental" xsi:type="object">SalesIgniter\Common\Console\Command\UninstallRentalUseWithCaution</item>
                 <item name="removeAttributes" xsi:type="object">SalesIgniter\Common\Console\Command\RemoveAttributeSourceModels</item>
                 <item name="restoreAttributes" xsi:type="object">SalesIgniter\Common\Console\Command\RestoreAttributeSourceModels</item>
