@@ -88,9 +88,7 @@ class VaultEnablerByMethodTest extends TestCase
         $token->method('getGatewayToken')->willReturn('A10P0D2B7C32');
         $token->method('getEntityId')->willReturn(null);
         $token->expects(self::once())->method('setIsVisible')->with(true);
-        $extension = $this->createStub(OrderPaymentExtensionInterface::class);
-        $extension->method('getVaultPaymentToken')->willReturn($token);
-        $payment->method('getExtensionAttributes')->willReturn($extension);
+        $payment->method('getExtensionAttributes')->willReturn($this->paymentExtension($token));
         $encryptor = $this->createStub(EncryptorInterface::class);
         $encryptor->method('getHash')->willReturn('hash');
         (new AfterPaymentSaveObserver($this->createStub(PaymentTokenManagementInterface::class), $encryptor))
@@ -104,8 +102,7 @@ class VaultEnablerByMethodTest extends TestCase
             self::markTestSkipped('magento/module-payment-services-paypal is not installed');
         }
         [$payment] = $this->forcedOrderPayment('payment_services_paypal_hosted_fields');
-        $extension = $this->createMock(OrderPaymentExtensionInterface::class);
-        $extension->expects(self::never())->method('setVaultPaymentToken');
+        $extension = $this->paymentExtension(null);
         $payment->method('getExtensionAttributes')->willReturn($extension);
         $subject = $this->createStub(PaymentDataObjectInterface::class);
         $subject->method('getPayment')->willReturn($payment);
@@ -114,5 +111,46 @@ class VaultEnablerByMethodTest extends TestCase
         // PayPal answered without a vault block: the order was created without the vault intent
         $instance->handle(['payment' => $subject], ['mp-transaction' => ['id' => 'TX1', 'status' => 'COMPLETED']]);
         self::assertTrue($payment->getAdditionalInformation(VaultConfigProvider::IS_ACTIVE_CODE), 'the flag is set, yet no token');
+        self::assertNull($extension->getVaultPaymentToken(), 'no vault token was stored');
+    }
+
+    /**
+     * The order payment's extension attributes holding $token. The unit autoloader generates
+     * OrderPaymentExtensionInterface EMPTY (no getVaultPaymentToken to stub), so a small stand-in implements it; when
+     * the full generated interface is loaded instead, a PHPUnit double is used.
+     */
+    private function paymentExtension(?PaymentTokenInterface $token): OrderPaymentExtensionInterface
+    {
+        if (method_exists(OrderPaymentExtensionInterface::class, 'getVaultPaymentToken')) {
+            $extension = $this->createStub(OrderPaymentExtensionInterface::class);
+            $extension->method('getVaultPaymentToken')->willReturnCallback(static function () use (&$token) {
+                return $token;
+            });
+            $extension->method('setVaultPaymentToken')->willReturnCallback(function ($value) use (&$token, &$extension) {
+                $token = $value;
+                return $extension;
+            });
+            return $extension;
+        }
+        return new class ($token) implements OrderPaymentExtensionInterface {
+            /** @var PaymentTokenInterface|null */
+            private $token;
+
+            public function __construct(?PaymentTokenInterface $token)
+            {
+                $this->token = $token;
+            }
+
+            public function getVaultPaymentToken()
+            {
+                return $this->token;
+            }
+
+            public function setVaultPaymentToken($token)
+            {
+                $this->token = $token;
+                return $this;
+            }
+        };
     }
 }
