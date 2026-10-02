@@ -38,11 +38,23 @@ class DbSchemaReaderTest extends TestCase
         }
         $this->assertArrayHasKey('sirental_serialnumber_details', $tables);
         $this->assertArrayHasKey('sirental_serial_photos', $tables);
-        $this->assertSame(['is_reserved', 'skip_rental_stock_check'], $tables['quote']['columns']);
-        $this->assertSame(['is_reserved'], $tables['quote_item']['columns']);
-        $this->assertSame(['pickup_date', 'dropoff_date', 'is_reserved', 'manually_reserved'], $tables['sales_order']['columns']);
-        $this->assertSame(['reservationorder_id', 'start_date', 'end_date'], $tables['sales_shipment_item']['columns']);
-        $this->assertSame(['reservationorder_id', 'start_date', 'end_date'], $tables['sales_creditmemo_item']['columns']);
+        // the rental module adds columns over time (booking deposits in 1.2.213: sirent_pay_choice, the
+        // sirent_due_later_* amounts and the balance columns), so these are checked as read, in this order,
+        // whichever release of it is installed
+        $this->assertColumnsInOrder(['is_reserved', 'skip_rental_stock_check'], $tables['quote']['columns'], 'quote');
+        $this->assertColumnsInOrder(['is_reserved'], $tables['quote_item']['columns'], 'quote_item');
+        $this->assertColumnsInOrder(['pickup_date', 'dropoff_date', 'is_reserved', 'manually_reserved'], $tables['sales_order']['columns'], 'sales_order');
+        $this->assertColumnsInOrder(['reservationorder_id', 'start_date', 'end_date'], $tables['sales_shipment_item']['columns'], 'sales_shipment_item');
+        $this->assertColumnsInOrder(['reservationorder_id', 'start_date', 'end_date'], $tables['sales_creditmemo_item']['columns'], 'sales_creditmemo_item');
+    }
+
+    /**
+     * @param string[] $expected
+     * @param string[] $actual
+     */
+    private function assertColumnsInOrder(array $expected, array $actual, string $table): void
+    {
+        $this->assertSame($expected, array_values(array_intersect($actual, $expected)), $table);
     }
 
     public function testTheSerialTablesForeignKeysAreRead(): void
