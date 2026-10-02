@@ -1,0 +1,25 @@
+{
+    "sicommon_pay_token": {
+        "column": {
+            "token_hash": true,
+            "purpose": true,
+            "subject_type": true,
+            "subject_id": true,
+            "context_id": true,
+            "expires_at": true,
+            "used_at": true,
+            "created_at": true
+        },
+        "index": {
+            "SICOMMON_PAY_TOKEN_SUBJECT_TYPE_SUBJECT_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "quote": {
+        "column": {
+            "sicommon_restore_quote_id": true
+        }
+    }
+}

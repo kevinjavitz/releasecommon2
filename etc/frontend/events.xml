@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- after Magento's success page empties the session's cart: a guest's parked cart comes back (CartHandOff) -->
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="sicommon_offsession_restore_parked_guest_cart" instance="SalesIgniter\Common\Observer\OffSession\RestoreParkedGuestCart"/>
+    </event>
+</config>

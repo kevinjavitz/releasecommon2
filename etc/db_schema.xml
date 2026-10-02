@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+  SalesIgniter_Common's tables (1.2.58): the shared off-session payment layer (Model/Payment/OffSession).
+  Remove with module:uninstall remove-data of the module that last needs them; nothing here holds money.
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sicommon_pay_token" resource="default" engine="innodb" comment="Signed single-use payment links (sha256 of the token only)">
+        <column xsi:type="varchar" name="token_hash" nullable="false" length="64" comment="sha256 of the token"/>
+        <column xsi:type="varchar" name="purpose" nullable="false" length="24" comment="pay_now|update_payment|..."/>
+        <column xsi:type="varchar" name="subject_type" nullable="false" length="32" comment="sisub_subscription|sirent_balance|..."/>
+        <column xsi:type="int" name="subject_id" unsigned="true" nullable="false" comment="Subject ID"/>
+        <column xsi:type="int" name="context_id" unsigned="true" nullable="true" comment="Context (subscriptions: the schedule row being recovered)"/>
+        <column xsi:type="datetime" name="expires_at" nullable="false" comment="Expires (UTC)"/>
+        <column xsi:type="datetime" name="used_at" nullable="true" comment="Used (UTC)"/>
+        <column xsi:type="datetime" name="created_at" nullable="true" comment="Created (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="token_hash"/>
+        </constraint>
+        <index referenceId="SICOMMON_PAY_TOKEN_SUBJECT_TYPE_SUBJECT_ID" indexType="btree">
+            <column name="subject_type"/>
+            <column name="subject_id"/>
+        </index>
+    </table>
+    <table name="quote" resource="checkout" comment="Sales Flat Quote">
+        <column xsi:type="int" name="sicommon_restore_quote_id" unsigned="true" nullable="true" comment="Cart parked by a payment-link checkout, restored after its order"/>
+    </table>
+</schema>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Off-session charges with the official Stripe module (stripe/stripe-payments 4.6+, StripeIntegration_Payments).
+  Registered by releasecommon2's registration.php only where that module's code is installed.
+  bin/magento module:enable SalesIgniter_CommonPayStripe
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="SalesIgniter_CommonPayStripe">
+        <sequence>
+            <module name="SalesIgniter_Common"/>
+            <module name="StripeIntegration_Payments"/>
+        </sequence>
+    </module>
+</config>

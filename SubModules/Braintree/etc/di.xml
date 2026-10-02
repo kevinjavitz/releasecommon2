@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- Braintree off-session charges: the generic Magento_Vault path plus afterBuild plugins while MitContext is active. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="PayPal\Braintree\Gateway\Request\TransactionSourceDataBuilder">
+        <plugin name="sicommon_braintree_transaction_source" type="SalesIgniter\Common\SubModules\Braintree\Plugin\TransactionSourcePlugin"/>
+    </type>
+    <type name="PayPal\Braintree\Gateway\Request\ThreeDSecureVaultDataBuilder">
+        <plugin name="sicommon_braintree_no_3ds_on_mit" type="SalesIgniter\Common\SubModules\Braintree\Plugin\ThreeDSecureVaultPlugin"/>
+    </type>
+    <type name="PayPal\Braintree\Gateway\Http\Client\TransactionSale">
+        <plugin name="sicommon_braintree_stash_result" type="SalesIgniter\Common\SubModules\Braintree\Plugin\StashTransactionResult"/>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\DeclineClassifier">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="braintree" xsi:type="object">SalesIgniter\Common\SubModules\Braintree\Model\DeclineMapper</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

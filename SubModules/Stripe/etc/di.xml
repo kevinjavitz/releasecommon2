@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- Stripe off-session charges: off-session PaymentIntents recorded through the Stripe module's "order from charge" path. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\StrategyPool">
+        <arguments>
+            <argument name="strategies" xsi:type="array">
+                <item name="stripe" xsi:type="object">SalesIgniter\Common\SubModules\Stripe\Model\StripeStrategy</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\OffSessionMethods">
+        <arguments>
+            <argument name="extraMethods" xsi:type="array">
+                <item name="stripe_payments" xsi:type="string">stripe</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\DeclineClassifier">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="stripe" xsi:type="object">SalesIgniter\Common\SubModules\Stripe\Model\DeclineMapper</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="StripeIntegration\Payments\Model\Config">
+        <plugin name="sicommon_stripe_save_card" type="SalesIgniter\Common\SubModules\Stripe\Plugin\SaveCardForOffSession"/>
+    </type>
+</config>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- ParadoxLabs TokenBase off-session charges: own stored-card table, is_subscription_generated. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\StrategyPool">
+        <arguments>
+            <argument name="strategies" xsi:type="array">
+                <item name="tokenbase" xsi:type="object">SalesIgniter\Common\SubModules\TokenBase\Model\TokenBaseStrategy</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\OffSessionMethods">
+        <arguments>
+            <argument name="extraMethods" xsi:type="array">
+                <item name="authnetcim" xsi:type="string">tokenbase</item>
+                <item name="authnetcim_ach" xsi:type="string">tokenbase</item>
+                <item name="paradoxlabs_cybersource" xsi:type="string">tokenbase</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\DeclineClassifier">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="tokenbase" xsi:type="object">SalesIgniter\Common\SubModules\TokenBase\Model\DeclineMapper</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="ParadoxLabs\Authnetcim\Model\Gateway">
+        <plugin name="sicommon_authnetcim_mit" type="SalesIgniter\Common\SubModules\TokenBase\Plugin\AuthnetcimMit"/>
+    </type>
+</config>

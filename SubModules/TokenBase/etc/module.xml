@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Off-session charges with ParadoxLabs TokenBase (paradoxlabs/authnetcim, paradoxlabs/cybersource, ...): its own
+  stored-card table. Registered by releasecommon2's registration.php only where TokenBase's code is installed.
+  bin/magento module:enable SalesIgniter_CommonPayTokenBase
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="SalesIgniter_CommonPayTokenBase">
+        <sequence>
+            <module name="SalesIgniter_Common"/>
+            <module name="ParadoxLabs_TokenBase"/>
+        </sequence>
+    </module>
+</config>

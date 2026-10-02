@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+  Off-session charges with PayPal Braintree (paypal/module-braintree-core): the generic Magento_Vault strategy
+  plus the merchant-initiated flags. Registered by releasecommon2's registration.php only where Braintree's
+  code is installed.
+  bin/magento module:enable SalesIgniter_CommonPayBraintree
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="SalesIgniter_CommonPayBraintree">
+        <sequence>
+            <module name="SalesIgniter_Common"/>
+            <module name="PayPal_Braintree"/>
+        </sequence>
+    </module>
+</config>

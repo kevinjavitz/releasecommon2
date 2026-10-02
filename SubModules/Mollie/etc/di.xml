@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!-- Mollie off-session charges through mandates. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\StrategyPool">
+        <arguments>
+            <argument name="strategies" xsi:type="array">
+                <item name="mollie" xsi:type="object">SalesIgniter\Common\SubModules\Mollie\Model\MollieStrategy</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\OffSessionMethods">
+        <arguments>
+            <argument name="extraMethods" xsi:type="array">
+                <item name="mollie_methods_creditcard" xsi:type="string">mollie</item>
+                <item name="mollie_methods_applepay" xsi:type="string">mollie</item>
+                <item name="mollie_methods_paypal" xsi:type="string">mollie</item>
+                <item name="mollie_methods_ideal" xsi:type="string">mollie</item>
+                <item name="mollie_methods_bancontact" xsi:type="string">mollie</item>
+                <item name="mollie_methods_eps" xsi:type="string">mollie</item>
+                <item name="mollie_methods_belfius" xsi:type="string">mollie</item>
+                <item name="mollie_methods_kbc" xsi:type="string">mollie</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Mollie\Payment\Service\Order\BuildTransaction">
+        <arguments>
+            <argument name="parts" xsi:type="array">
+                <item name="zzSicommonMit" xsi:type="object">SalesIgniter\Common\SubModules\Mollie\Model\MitTransactionPart</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\Model\Payment\OffSession\DeclineClassifier">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="mollie" xsi:type="object">SalesIgniter\Common\SubModules\Mollie\Model\DeclineMapper</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="SalesIgniter\Common\SubModules\Mollie\Model\MollieStrategy">
+        <arguments>
+            <argument name="startTransaction" xsi:type="object">Mollie\Payment\Service\Mollie\StartTransaction\Proxy</argument>
+        </arguments>
+    </type>
+</config>

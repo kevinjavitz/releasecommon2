@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Off-session charges with Mollie mandates (mollie/magento2). Registered by releasecommon2's registration.php
+  only where Mollie's code is installed.
+  bin/magento module:enable SalesIgniter_CommonPayMollie
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="SalesIgniter_CommonPayMollie">
+        <sequence>
+            <module name="SalesIgniter_Common"/>
+            <module name="Mollie_Payment"/>
+        </sequence>
+    </module>
+</config>

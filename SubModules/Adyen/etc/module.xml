@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Off-session charges with Adyen (adyen/module-payment >= 11.2): vault tokens, ContAuth, an asynchronous result.
+  Registered by releasecommon2's registration.php only where Adyen's code is installed.
+  bin/magento module:enable SalesIgniter_CommonPayAdyen
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="SalesIgniter_CommonPayAdyen">
+        <sequence>
+            <module name="SalesIgniter_Common"/>
+            <module name="Adyen_Payment"/>
+        </sequence>
+    </module>
+</config>

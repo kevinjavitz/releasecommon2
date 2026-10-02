@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- The shared off-session payment layer (Model/Payment/OffSession): saved-card forcing, MIT order email, cart hand-off. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_model_service_quote_submit_before">
+        <observer name="sicommon_offsession_force_vault_save" instance="SalesIgniter\Common\Observer\OffSession\ForceVaultSave"/>
+        <observer name="sicommon_offsession_mit_order_email" instance="SalesIgniter\Common\Observer\OffSession\SuppressMitOrderEmail"/>
+    </event>
+    <event name="sales_model_service_quote_submit_success">
+        <observer name="sicommon_offsession_restore_parked_cart" instance="SalesIgniter\Common\Observer\OffSession\RestoreParkedCart"/>
+    </event>
+</config>
