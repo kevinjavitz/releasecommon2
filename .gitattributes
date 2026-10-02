@@ -1,0 +1,6 @@
+# Left out of the composer dist zip (git archive): tests, developer notes and tooling.
+/Test export-ignore
+/SubModules/*/Test export-ignore
+/CLAUDE.md export-ignore
+/.claude export-ignore
+/.gitattributes export-ignore
