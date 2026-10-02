@@ -25,9 +25,13 @@ share one copy. Namespace `SalesIgniter\Common\Model\Payment\OffSession\`.
 2. Register a `SubjectSaverInterface` in `SubjectSaver` di `savers` and, if checkouts of its products
    must keep the card, a `SavedCardRequirementInterface` in `SavedCardRequirement` di `providers`.
 3. At first checkout: `StrategyPool::forCheckoutMethod($method, $storeId)->captureFromOrder($subject, $order)`.
-4. To charge: build a quote, `$strategy = $pool->forSubject($subject)`, `readiness()`, then
-   `MitContext::run($subject, $variable, fn() => configureQuote + place order + afterOrderPlaced, [context])`;
-   classify a failure with `DeclineClassifier::classify()`.
+4. To charge: build a quote, `$strategy = $pool->forSubject($subject)`, `readiness()` (null = can
+   charge, else `[Decline class, message]`), `configureQuote()` (Stripe charges HERE, before the
+   order; the others only set the payment), save the quote, then
+   `MitContext::run($subject, $variable, fn() => submit the quote + afterOrderPlaced(), [context])`
+   (subscriptions' RenewalService is the reference); classify a failure with
+   `DeclineClassifier::classify()`. `isAsync()` (Adyen, Mollie) = wait for the webhook;
+   `isManual()` (offline) = a pending order someone pays by hand.
 
 ## Gateway sub-modules (`SubModules/*`)
 
@@ -59,3 +63,20 @@ Mollie's "order contains a subscription" rule.
 The off-session phrases (28 in 1.2.58) are in `i18n/en_US.csv` only; locale files are optional
 (Kevin, 2026-10-02). Test classes never call `__()` / `new Phrase()` in `SubModules/*/Test`: the
 phrase scanner skips only top-level `Test/`.
+
+## Saving the card at checkout, per Vault method (plan §15 R2 spike, 2026-10-02)
+
+`ForceVaultSave` sets `is_active_payment_token_enabler` at `sales_model_service_quote_submit_before`,
+which runs before `Order::place()` (`Test/Unit/Observer/OffSession/VaultEnablerByMethodTest`):
+
+| Method | Forced server-side? | Why |
+|---|---|---|
+| Braintree (`braintree` -> `braintree_cc_vault`; PayPal, Apple Pay, Google Pay, Venmo, ACH) | yes | `VaultDataBuilder` reads the flag from the order payment while building the sale: `storeInVaultOnSuccess` |
+| Payflow Pro (`payflowpro` -> `payflowpro_cc_vault`) | yes | `Transparent::authorize()` always makes the token (PNREF); the flag sets `is_visible` (Vault's AfterPaymentSaveObserver). Needs "reference transactions" on in PayPal Manager; token expiry = min(card, 1 year) |
+| Payment Services (`payment_services_paypal_hosted_fields` -> `payment_services_paypal_vault`) | no | the vault intent is sent when the PayPal order is created (`paymentservicespaypal/order/create`, param `vault`) before place-order. Would need a plugin on `OrderService::create()` (`$data['vault']`, logged-in customers only) plus its own off-session module (VaultStrategy excludes it). Link collection until then |
+| Stripe (official module) | yes, own path | `SaveCardForOffSession` plugin: `setup_future_usage=off_session` |
+| TokenBase (Authorize.Net CIM, CyberSource) | yes, own path | `SaveCardForOffSession` observer sets `save=1` |
+
+Guest checkouts: Magento saves a guest's vault token with `customer_id` NULL (and Payment Services
+vaults only for signed-in customers). Charging a guest's token off-session is untested; the
+deposits plan has guests pay by link.
