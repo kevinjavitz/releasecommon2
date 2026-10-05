@@ -22,6 +22,11 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 
 class RestoreAttributeSourceModels extends Command
 {
+    /** sirent_hotel_mode's source since rental 1.2.214 ("Booked by") */
+    public const BOOKED_BY_SOURCE = 'SalesIgniter\Rental\Model\Attribute\Sources\BookedBy';
+
+    /** sirent_charge_return_day's source (rental 1.2.214) */
+    public const CHARGE_RETURN_DAY_SOURCE = 'SalesIgniter\Rental\Model\Attribute\Sources\ChargeReturnDay';
 
 
     private $eavSetup;
@@ -107,7 +112,6 @@ class RestoreAttributeSourceModels extends Command
             'source_model'  =>  ''
         ];
         $attributes = [
-            'sirent_hotel_mode',
             'sirent_always_show',
             'sirent_damage_waiver',
             'sirent_autoselectstartdate',
@@ -129,6 +133,19 @@ class RestoreAttributeSourceModels extends Command
         foreach ($attributes as $attribute) {
             $this->updateProductEavAttribute($attribute, $multiTypeSettings);
         }
+
+        // "Booked by" (rental 1.2.214, its BookedByProductSettings data patch made the old Yes/No "Enable Hotel
+        // Mode" a select over Sources\BookedBy) and "Also charge the return day" (new there). A blank source left
+        // the Booked by select with no choices. An older rental has neither class; a source model naming a class
+        // that does not exist takes the product form down, so there the source stays blank as before.
+        $this->updateProductEavAttribute('sirent_hotel_mode', [
+            'backend_model' => 'SalesIgniter\Rental\Model\Attribute\Backend\SirentBackendConfig',
+            'source_model'  => $this->rentalClassOrBlank(self::BOOKED_BY_SOURCE)
+        ]);
+        $this->updateProductEavAttribute('sirent_charge_return_day', [
+            'backend_model' => 'SalesIgniter\Rental\Model\Attribute\Backend\SirentBackendConfig',
+            'source_model'  => $this->rentalClassOrBlank(self::CHARGE_RETURN_DAY_SOURCE)
+        ]);
 
         $attribute = 'sirent_excluded_days';
         $multiTypeSettings = [
@@ -346,6 +363,17 @@ class RestoreAttributeSourceModels extends Command
         $output->writeln("<info>Attribute models restored</info>");
 
         return 0;
+    }
+
+    /** The class when the installed rental module has it, else '' (no source model). */
+    protected function rentalClassOrBlank(string $class): string
+    {
+        return $this->classExists($class) ? $class : '';
+    }
+
+    protected function classExists(string $class): bool
+    {
+        return class_exists($class);
     }
 
     protected function updateProductEavAttributes( $Attributes ) {

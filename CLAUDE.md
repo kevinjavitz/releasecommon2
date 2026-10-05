@@ -35,7 +35,8 @@ timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpun
 ```
 
 The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
-1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58, no database. The sub-module tests skip
+1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58 (403 in `Test/Unit` with 1.2.59's
+command fix), no database. The sub-module tests skip
 where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
 the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
 
@@ -82,6 +83,12 @@ objects it is handed, so mocks reach further here than a fixture install would.
 - **`salesigniter:Restore:Attributes`** — the inverse, and the only place the attribute → model mapping
   is written down (`sirent_minmaxhidecalendar` -> `SirentBackendConfig` added in 1.2.56). Also re-applies `apply_to = 'sirent,bundle'` to the 17 store-hours attributes. The
   two are only safe as a pair: Remove throws the mapping away and Restore is what knows it.
+  **1.2.59 (for rental 1.2.214's "Booked by"):** Restore gives `sirent_hotel_mode` its source
+  `Sources\BookedBy` (it gave it none, so the Booked by select came back with no choices) and
+  `sirent_charge_return_day` its `SirentBackendConfig` + `Sources\ChargeReturnDay`; both commands now cover
+  `sirent_charge_return_day`. Each source is set only when the installed rental has the class
+  (`rentalClassOrBlank()`): on an older rental `sirent_hotel_mode` is still the Yes/No with no source, and a
+  source naming a missing class takes the product form down.
 
 Both skip any attribute this install does not have (`getAttributeId()` first), so they are idempotent
 and harmless on a partial install.

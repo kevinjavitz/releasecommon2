@@ -87,21 +87,22 @@ class AttributeSourceModelCommandsTest extends TestCase
         $this->assertSame([], $this->updates, 'no attribute exists, so nothing may be updated');
     }
 
-    public function testRemoveWalksFiftyThreeCodesOfWhichOneIsListedTwice(): void
+    public function testRemoveWalksFiftyFourCodesOfWhichOneIsListedTwice(): void
     {
-        // Every code exists, so every code is written. The list in the command has 53 entries
-        // and 52 distinct codes: sirent_autoselectstartdate appears twice. Harmless (the
+        // Every code exists, so every code is written. The list in the command has 54 entries
+        // and 53 distinct codes: sirent_autoselectstartdate appears twice. Harmless (the
         // second write is identical) but it is there, and a future edit that "tidies" the list
-        // will show up here. 1.2.56 added sirent_minmaxhidecalendar, the 53rd.
+        // will show up here. 1.2.56 added sirent_minmaxhidecalendar, the 53rd; 1.2.59
+        // sirent_charge_return_day, the 54th.
         $this->existingAttributes = ['*'];
 
         (new CommandTester($this->removeCommand()))->execute([]);
 
         $codes = array_column($this->updates, 'code');
 
-        // Two writes (backend_model, source_model) per list entry: 53 entries -> 106 writes.
-        $this->assertCount(106, $this->updates);
-        $this->assertSame(52, count(array_unique($codes)), 'the list has 53 entries but 52 distinct codes');
+        // Two writes (backend_model, source_model) per list entry: 54 entries -> 108 writes.
+        $this->assertCount(108, $this->updates);
+        $this->assertSame(53, count(array_unique($codes)), 'the list has 54 entries but 53 distinct codes');
         $this->assertSame(
             4,
             count(array_keys($codes, 'sirent_autoselectstartdate', true)),
@@ -125,6 +126,24 @@ class AttributeSourceModelCommandsTest extends TestCase
             ['code' => 'sirent_minmaxhidecalendar', 'key' => 'backend_model', 'value' => null],
             $this->updates
         );
+    }
+
+    /**
+     * "Also charge the return day" (rental 1.2.214) has the same SirentBackendConfig backend as
+     * sirent_minmaxhidecalendar, so left in place it would keep the product page dead the same way.
+     */
+    public function testRemoveClearsSirentChargeReturnDay(): void
+    {
+        $this->existingAttributes = ['*'];
+
+        (new CommandTester($this->removeCommand()))->execute([]);
+
+        foreach (['backend_model', 'source_model'] as $key) {
+            $this->assertContains(
+                ['code' => 'sirent_charge_return_day', 'key' => $key, 'value' => null],
+                $this->updates
+            );
+        }
     }
 
     public function testRemoveReportsWhatItDid(): void
@@ -232,6 +251,54 @@ class AttributeSourceModelCommandsTest extends TestCase
         ];
     }
 
+    /**
+     * Rental 1.2.214 made sirent_hotel_mode "Booked by", a select over Sources\BookedBy, and added
+     * sirent_charge_return_day over Sources\ChargeReturnDay. Until 1.2.59 Restore gave
+     * sirent_hotel_mode a blank source, so the Booked by select came back with no choices.
+     */
+    public function testRestoreGivesBookedByAndChargeReturnDayTheirSources(): void
+    {
+        $this->existingAttributes = ['*'];
+        $ns = 'SalesIgniter\Rental\Model\Attribute\\';
+
+        (new CommandTester($this->restoreCommand(true)))->execute([]);
+
+        $this->assertSame([$ns . 'Sources\BookedBy'], $this->written('sirent_hotel_mode', 'source_model'));
+        $this->assertSame([$ns . 'Backend\SirentBackendConfig'], $this->written('sirent_hotel_mode', 'backend_model'));
+        $this->assertSame([$ns . 'Sources\ChargeReturnDay'], $this->written('sirent_charge_return_day', 'source_model'));
+        $this->assertSame(
+            [$ns . 'Backend\SirentBackendConfig'],
+            $this->written('sirent_charge_return_day', 'backend_model')
+        );
+    }
+
+    /**
+     * Common can be installed next to a rental older than 1.2.214, whose sirent_hotel_mode is still
+     * the Yes/No "Enable Hotel Mode" with no source. A source naming a class that does not exist
+     * takes the product form down, so there it stays blank, as before.
+     */
+    public function testRestoreLeavesHotelModesSourceBlankOnAnOlderRental(): void
+    {
+        $this->existingAttributes = ['sirent_hotel_mode'];
+
+        (new CommandTester($this->restoreCommand(false)))->execute([]);
+
+        $this->assertSame([''], $this->written('sirent_hotel_mode', 'source_model'));
+        $this->assertSame([], $this->written('sirent_charge_return_day', 'source_model'), 'not on this install');
+    }
+
+    public function testTheBookedBySourceIsTheRealClassName(): void
+    {
+        $this->assertSame(
+            'SalesIgniter\Rental\Model\Attribute\Sources\BookedBy',
+            RestoreAttributeSourceModels::BOOKED_BY_SOURCE
+        );
+        $this->assertSame(
+            'SalesIgniter\Rental\Model\Attribute\Sources\ChargeReturnDay',
+            RestoreAttributeSourceModels::CHARGE_RETURN_DAY_SOURCE
+        );
+    }
+
     public function testRestoreReappliesTheSeventeenTimeAttributesToSirentAndBundle(): void
     {
         $this->existingAttributes = ['*'];
@@ -278,11 +345,37 @@ class AttributeSourceModelCommandsTest extends TestCase
         return new RemoveAttributeSourceModels(...$args);
     }
 
-    private function restoreCommand(): RestoreAttributeSourceModels
+    /**
+     * @param bool|null $rentalHasBookedBy null: ask the autoloader (the rental module installed here);
+     *                                     true / false: a rental with or without the 1.2.214 classes
+     */
+    private function restoreCommand(?bool $rentalHasBookedBy = null): RestoreAttributeSourceModels
     {
         $args = $this->constructorArgs();
+        if ($rentalHasBookedBy === null) {
+            return new RestoreAttributeSourceModels(...$args);
+        }
+        $command = new class (...$args) extends RestoreAttributeSourceModels {
+            /** @var bool */
+            public $hasClasses = true;
 
-        return new RestoreAttributeSourceModels(...$args);
+            protected function classExists(string $class): bool
+            {
+                return $this->hasClasses;
+            }
+        };
+        $command->hasClasses = $rentalHasBookedBy;
+
+        return $command;
+    }
+
+    /** @return array<int,mixed> the values written to one attribute's column, in order */
+    private function written(string $code, string $key): array
+    {
+        return array_values(array_map(
+            static fn (array $u) => $u['value'],
+            array_filter($this->updates, static fn (array $u): bool => $u['code'] === $code && $u['key'] === $key)
+        ));
     }
 
     /**
