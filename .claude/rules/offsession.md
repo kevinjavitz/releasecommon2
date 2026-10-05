@@ -59,6 +59,15 @@ compiler / read only where registered); common's own `etc/` may not. 1.2.58 as f
 compile on every store without Stripe or without TokenBase (and would have without Mollie); fixed
 before its release (2026-10-05).
 
+**The same rule holds for optional Magento core modules**, everywhere in the package (not only
+`SubModules/`): a Magento type the compiler reads must come from `etc/module.xml`'s sequence (Quote, Sales,
+Checkout, Payment, Vault) or one of their Composer requirements, recursively (about 60 modules on 2.4.9).
+`Magento_InstantPurchase` is NOT among them: a store can remove it together with Magento_Paypal, Braintree
+and Payment Services. `VaultStrategy` therefore takes `ObjectManagerInterface` and gets InstantPurchase's
+`IntegrationsManager` by class name on first use, when the class exists (the same shared instance the old
+di.xml argument injected); without the module the vault command resolves the token itself, as it already
+did for a token with no InstantPurchase integration. Found and fixed before 1.2.58's release (2026-10-05).
+
 Stays in the consumers: subscriptions' renewal policy, dunning, RefuseBothKinds / Stripe Billing
 rules, the first-order `recurring_first` (Braintree) and Adyen "Subscription" first-order flags,
 Mollie's "order contains a subscription" rule.
@@ -71,12 +80,16 @@ Mollie's "order contains a subscription" rule.
 - `Test/Unit/Architecture/NoConsumerDependencyTest`: the layer never names `SalesIgniter\Rental`,
   `SalesIgniter_Rental`, `SalesIgniter\Subscriptions` or `SalesIgniter_Subscriptions`.
 - `Test/Unit/Architecture/SubModulesCompileSafeTest`: no class in the package (Test/ aside) names a
-  gateway type where the compiler reads it (tokenizer: parents, interfaces, traits, constructor types
-  and defaults); every `SubModules/` class is read the compiler's way (`ClassReader::getConstructor()` /
-  `getParents()`) in a child PHP where every gateway namespace throws on autoload, i.e. a store with no
-  gateway, whatever this dev site has installed; every `SubModules/` directory is registered behind a
-  gateway marker; common's `etc/` names no gateway class. A new gateway sub-module adds its namespace
-  to the test's `GATEWAY_NAMESPACES`.
+  gateway type or an optional Magento module's type where the compiler reads it (tokenizer: parents,
+  interfaces, traits, constructor types and defaults; "optional" = outside the Composer closure of
+  `etc/module.xml`'s sequence, read from the installed packages); every `SubModules/`,
+  `Model/Payment/OffSession/` and `Observer/OffSession/` class is read the compiler's way
+  (`ClassReader::getConstructor()` / `getParents()`) in a child PHP where every gateway namespace and every
+  optional Magento module throws on autoload, i.e. a store with no gateway and no InstantPurchase, whatever
+  this dev site has installed; every `SubModules/` directory is registered behind a gateway marker;
+  common's `etc/` names no gateway class and no optional Magento class. A new gateway sub-module adds its
+  namespace to the test's `GATEWAY_NAMESPACES`; a new Magento dependency goes into `etc/module.xml`'s
+  sequence first.
 - This is the first schema common owns (`etc/db_schema.xml`: `sicommon_pay_token`,
   `quote.sicommon_restore_quote_id`); CLAUDE.md's "owns no database tables" predates 1.2.58.
 

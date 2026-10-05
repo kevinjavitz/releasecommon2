@@ -33,11 +33,6 @@
             </argument>
         </arguments>
     </type>
-    <type name="SalesIgniter\Common\Model\Payment\OffSession\Strategy\VaultStrategy">
-        <arguments>
-            <argument name="integrations" xsi:type="object">Magento\InstantPurchase\PaymentMethodIntegration\IntegrationsManager</argument>
-        </arguments>
-    </type>
     <preference for="SalesIgniter\Common\Model\Payment\OffSession\SavedCardRequirementInterface" type="SalesIgniter\Common\Model\Payment\OffSession\SavedCardRequirement"/>
     <preference for="SalesIgniter\Common\Model\Payment\OffSession\SubjectSaverInterface" type="SalesIgniter\Common\Model\Payment\OffSession\SubjectSaver"/>
     <type name="SalesIgniter\Common\Model\Payment\OffSession\CartHandOff">

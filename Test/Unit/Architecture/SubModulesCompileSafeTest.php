@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\Test\Unit\Architecture;
 
+use Composer\InstalledVersions;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,6 +22,12 @@ use PHPUnit\Framework\TestCase;
  *
  * Found in 1.2.58 before its release (2026-10-05): StripeStrategy, StripeGateway, TokenBaseStrategy and
  * MollieStrategy took gateway types in their constructors, MitTransactionPart implemented a Mollie interface.
+ *
+ * The same holds for optional Magento core modules. A store may remove modules such as Magento_InstantPurchase
+ * (together with Magento_Paypal, Braintree and Payment Services), so a Magento type the compiler reads must come
+ * from a module every store with SalesIgniter_Common has: one in etc/module.xml's sequence, or one of their
+ * Composer requirements, recursively (alwaysInstalledMagentoNamespaces()). Found the same day: VaultStrategy
+ * took Magento_InstantPurchase's IntegrationsManager in its constructor; it now gets it by name on first use.
  */
 class SubModulesCompileSafeTest extends TestCase
 {
@@ -28,6 +35,9 @@ class SubModulesCompileSafeTest extends TestCase
     private const GATEWAY_NAMESPACES = [
         'StripeIntegration\\', 'Stripe\\', 'PayPal\\Braintree\\', 'Braintree\\', 'Adyen\\', 'Mollie\\', 'ParadoxLabs\\',
     ];
+
+    /** @var list<string>|null cache of alwaysInstalledMagentoNamespaces() */
+    private static $alwaysInstalled;
 
     private const BUILTIN = [
         'array', 'bool', 'callable', 'false', 'float', 'int', 'iterable', 'mixed', 'never', 'null', 'object',
@@ -51,22 +61,71 @@ class SubModulesCompileSafeTest extends TestCase
         self::assertSame([], $hits);
     }
 
+    /** No class in the package names a type of an optional Magento module (outside module.xml's dependencies) where the compiler reads it. */
+    public function testNoClassNamesAnOptionalCoreModuleTypeWhereTheCompilerReadsIt(): void
+    {
+        $hits = [];
+        $files = $this->scannedFiles();
+        foreach ($files as $relative => $path) {
+            foreach (self::compilerVisibleTypes((string)file_get_contents($path)) as $class => $types) {
+                foreach ($types as $type) {
+                    if (self::isOptionalCoreType($type)) {
+                        $hits[] = $relative . ': ' . $class . ' needs ' . $type;
+                    }
+                }
+            }
+        }
+        self::assertArrayHasKey('Model/Payment/OffSession/Strategy/VaultStrategy.php', $files, 'the scan reaches the off-session layer');
+        self::assertSame([], $hits);
+    }
+
+    /** What counts as optional: Magento modules outside the dependencies of etc/module.xml's sequence. */
+    public function testOptionalCoreModulesAreTheOnesNoDeclaredDependencyNeeds(): void
+    {
+        foreach ([
+            'Magento\\InstantPurchase\\PaymentMethodIntegration\\IntegrationsManager',
+            '\\Magento\\Paypal\\Model\\Config',
+            'Magento\\PaymentServicesPaypal\\Model\\Config',
+            'Magento\\InstantPurchase\\Model\\QuoteManagement\\PaymentConfigurationFactory',
+        ] as $optional) {
+            self::assertTrue(self::isOptionalCoreType($optional), $optional);
+        }
+        foreach ([
+            'Magento\\Framework\\ObjectManagerInterface',
+            'Magento\\Vault\\Api\\PaymentTokenManagementInterface',
+            'Magento\\Checkout\\Model\\Session\\Proxy',
+            'Magento\\Quote\\Model\\QuoteFactory',
+            'Magento\\Customer\\Api\\CustomerRepositoryInterface',
+            'Magento\\Catalog\\Api\\ProductRepositoryInterface',
+            'SalesIgniter\\Common\\Model\\Payment\\OffSession\\Strategy\\VaultStrategy',
+            'Mollie\\Payment\\Model\\Mollie',
+        ] as $required) {
+            self::assertFalse(self::isOptionalCoreType($required), $required);
+        }
+    }
+
     /**
      * The same reads as setup:di:compile (load the class, ClassReader::getConstructor() and getParents()) for
-     * every class under SubModules/, in a child PHP where every gateway namespace is unloadable: the store
-     * without any gateway, on any dev site. (SubModules/ only: elsewhere constructors may take classes that
-     * the compiler generates first, such as factories, which plain Composer autoloading cannot load.)
+     * every class under SubModules/ and in the off-session layer, in a child PHP where every gateway namespace
+     * and every optional Magento module is unloadable: the store without any gateway and without
+     * Magento_InstantPurchase, on any dev site. (Those directories only: elsewhere constructors may take classes
+     * that the compiler generates first, such as factories, which plain Composer autoloading cannot load.)
      */
     public function testTheCompilerCanReadEverySubModuleClassWithNoGatewayInstalled(): void
     {
         $classes = [];
+        $needed = [];
         foreach ($this->scannedFiles() as $relative => $path) {
-            if (strpos($relative, 'SubModules/') !== 0) {
+            if (strpos($relative, 'SubModules/') !== 0
+                && strpos($relative, 'Model/Payment/OffSession/') !== 0
+                && strpos($relative, 'Observer/OffSession/') !== 0
+            ) {
                 continue;
             }
-            $names = array_keys(self::compilerVisibleTypes((string)file_get_contents($path)));
-            if ($names) {
-                $classes[$path] = $names;
+            $types = self::compilerVisibleTypes((string)file_get_contents($path));
+            if ($types) {
+                $classes[$path] = array_keys($types);
+                $needed = array_merge($needed, ...array_values($types));
             }
         }
         $autoload = dirname((string)(new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2) . '/autoload.php';
@@ -75,7 +134,12 @@ class SubModulesCompileSafeTest extends TestCase
         $output = [];
         $status = -1;
         try {
-            file_put_contents($list, json_encode(['autoload' => $autoload, 'classes' => $classes, 'gateways' => self::GATEWAY_NAMESPACES]));
+            file_put_contents($list, json_encode([
+                'autoload' => $autoload,
+                'classes' => $classes,
+                'gateways' => self::GATEWAY_NAMESPACES,
+                'magento' => self::alwaysInstalledMagentoNamespaces(),
+            ]));
             file_put_contents($script, self::CHILD);
             $command = escapeshellarg(PHP_BINARY) . ' -d memory_limit=512M ' . escapeshellarg($script) . ' ' . escapeshellarg($list) . ' 2>&1';
             exec($command, $output, $status);
@@ -86,9 +150,13 @@ class SubModulesCompileSafeTest extends TestCase
         $result = json_decode((string)end($output), true);
         self::assertIsArray($result, 'child PHP (status ' . $status . '): ' . implode("\n", $output));
         self::assertSame([], $result['preloaded'], 'gateway types loaded before the check could hide them');
+        // a Composer "files" autoload may declare an optional module's type up front (mollie/magento2 declares
+        // QuoteGraphQl's AdditionalDataProviderInterface): it hides nothing as long as no class here needs it
+        self::assertSame([], array_values(array_intersect($result['preloadedOptional'], $needed)), 'optional Magento types loaded before the check');
         self::assertSame([], $result['failed']);
         self::assertSame(count($classes, COUNT_RECURSIVE) - count($classes), $result['read'], 'every class read');
-        self::assertGreaterThan(20, $result['read']);
+        self::assertGreaterThan(40, $result['read']);
+        self::assertArrayHasKey(dirname(__DIR__, 3) . '/Model/Payment/OffSession/Strategy/VaultStrategy.php', $classes);
     }
 
     public function testTheChecksSeeEveryWayAClassCanNeedAGatewayType(): void
@@ -170,7 +238,10 @@ PHP;
         self::assertSame($dirs, $registered, 'every SubModules directory has a gateway marker in registration.php');
     }
 
-    /** etc/ of SalesIgniter_Common itself is read on every store: no type, preference, plugin or argument naming a gateway class. */
+    /**
+     * etc/ of SalesIgniter_Common itself is read on every store: no type, preference, plugin or argument naming a
+     * gateway class or a class of an optional Magento module.
+     */
     public function testTheAlwaysLoadedConfigNamesNoGatewayClass(): void
     {
         $root = dirname(__DIR__, 3);
@@ -181,14 +252,80 @@ PHP;
                 continue;
             }
             foreach (file($file->getPathname()) ?: [] as $n => $line) {
+                $where = substr($file->getPathname(), strlen($root) + 1) . ':' . ($n + 1) . ': ' . trim($line);
                 foreach (self::GATEWAY_NAMESPACES as $ns) {
                     if (preg_match('/(?<![\w\\\\])' . preg_quote($ns, '/') . '\w/', $line)) {
-                        $hits[] = substr($file->getPathname(), strlen($root) + 1) . ':' . ($n + 1) . ': ' . trim($line);
+                        $hits[] = $where;
+                    }
+                }
+                preg_match_all('/(?<![\w\\\\])Magento\\\\\w+\\\\[\w\\\\]+/', $line, $names);
+                foreach ($names[0] as $name) {
+                    if (self::isOptionalCoreType($name)) {
+                        $hits[] = $where;
                     }
                 }
             }
         }
         self::assertSame([], $hits);
+    }
+
+    /** A Magento type from a module a store with SalesIgniter_Common may lack (see alwaysInstalledMagentoNamespaces()). */
+    private static function isOptionalCoreType(string $type): bool
+    {
+        $type = ltrim($type, '\\');
+        if (strpos($type, 'Magento\\') !== 0) {
+            return false;
+        }
+        foreach (self::alwaysInstalledMagentoNamespaces() as $ns) {
+            if (strpos($type, $ns) === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * The Magento namespaces every store with SalesIgniter_Common has: magento/framework, the modules in
+     * etc/module.xml's sequence, and their magento/module-* and magento/framework* Composer requirements,
+     * recursively (a store cannot remove one of those without removing a module this one depends on). Read from
+     * the installed packages' composer.json (their psr-4 roots). On Magento 2.4.9 that is about 60 modules;
+     * Magento_InstantPurchase, Magento_Paypal and Payment Services are not among them.
+     *
+     * @return list<string> namespace prefixes ending in a backslash
+     */
+    private static function alwaysInstalledMagentoNamespaces(): array
+    {
+        if (self::$alwaysInstalled !== null) {
+            return self::$alwaysInstalled;
+        }
+        preg_match_all('/<module name="Magento_(\w+)"/', (string)file_get_contents(dirname(__DIR__, 3) . '/etc/module.xml'), $modules);
+        self::assertNotEmpty($modules[1], 'etc/module.xml has a Magento sequence');
+        $queue = ['magento/framework'];
+        foreach ($modules[1] as $module) {
+            $queue[] = 'magento/module-' . strtolower((string)preg_replace('/(?<!^)[A-Z]/', '-$0', $module));
+        }
+        $seen = [];
+        $namespaces = [];
+        while ($queue) {
+            $package = array_pop($queue);
+            if (isset($seen[$package])) {
+                continue;
+            }
+            $seen[$package] = true;
+            $path = InstalledVersions::isInstalled($package) ? InstalledVersions::getInstallPath($package) : null;
+            self::assertNotNull($path, $package . ' (a dependency of etc/module.xml) is installed');
+            $json = json_decode((string)file_get_contents($path . '/composer.json'), true);
+            foreach (array_keys($json['autoload']['psr-4'] ?? []) as $ns) {
+                $namespaces[] = $ns;
+            }
+            foreach (array_keys($json['require'] ?? []) as $dependency) {
+                if (strpos($dependency, 'magento/module-') === 0 || strpos($dependency, 'magento/framework') === 0) {
+                    $queue[] = $dependency;
+                }
+            }
+        }
+        self::assertContains('Magento\\Vault\\', $namespaces);
+        return self::$alwaysInstalled = array_values(array_unique($namespaces));
     }
 
     private static function isGatewayType(string $type): bool
@@ -451,10 +588,27 @@ $isGateway = static function (string $class) use ($job): bool {
     }
     return false;
 };
-$preloaded = array_values(array_filter(array_merge(get_declared_classes(), get_declared_interfaces(), get_declared_traits()), $isGateway));
-spl_autoload_register(static function (string $class) use ($isGateway): void {
+$isOptionalMagento = static function (string $class) use ($job): bool {
+    $class = ltrim($class, '\\');
+    if (strpos($class, 'Magento\\') !== 0) {
+        return false;
+    }
+    foreach ($job['magento'] as $ns) {
+        if (strpos($class, $ns) === 0) {
+            return false;
+        }
+    }
+    return true;
+};
+$declared = array_merge(get_declared_classes(), get_declared_interfaces(), get_declared_traits());
+$preloaded = array_values(array_filter($declared, $isGateway));
+$preloadedOptional = array_values(array_filter($declared, $isOptionalMagento));
+spl_autoload_register(static function (string $class) use ($isGateway, $isOptionalMagento): void {
     if ($isGateway($class)) {
         throw new \RuntimeException('gateway type needed: ' . $class);
+    }
+    if ($isOptionalMagento($class)) {
+        throw new \RuntimeException('optional Magento module type needed: ' . $class);
     }
 }, true, true);
 $reader = new \Magento\Framework\Code\Reader\ClassReader();
@@ -478,6 +632,6 @@ foreach ($job['classes'] as $file => $classes) {
         }
     }
 }
-echo json_encode(['preloaded' => $preloaded, 'read' => $read, 'failed' => $failed]), "\n";
+echo json_encode(['preloaded' => $preloaded, 'preloadedOptional' => $preloadedOptional, 'read' => $read, 'failed' => $failed]), "\n";
 PHP;
 }

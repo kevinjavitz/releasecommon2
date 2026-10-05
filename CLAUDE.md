@@ -35,12 +35,13 @@ timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpun
 ```
 
 The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
-1.2.57; 394 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58, no database. The sub-module tests skip
+1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58, no database. The sub-module tests skip
 where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
 the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
 
-`Test/Unit/Architecture/SubModulesCompileSafeTest` guards `setup:di:compile` on stores without a gateway: see
-`.claude/rules/offsession.md`, "Gateway sub-modules".
+`Test/Unit/Architecture/SubModulesCompileSafeTest` guards `setup:di:compile` on stores without a gateway or
+without an optional core module such as Magento_InstantPurchase: see `.claude/rules/offsession.md`, "Gateway
+sub-modules".
 
 There are no integration tests. Nothing in this module talks to the database except through EAV setup
 objects it is handed, so mocks reach further here than a fixture install would.

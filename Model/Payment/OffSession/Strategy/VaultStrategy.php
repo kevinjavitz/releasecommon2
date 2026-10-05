@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace SalesIgniter\Common\Model\Payment\OffSession\Strategy;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\InstantPurchase\PaymentMethodIntegration\IntegrationsManager;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -30,6 +31,11 @@ use SalesIgniter\Common\Model\Payment\OffSession\StrategyInterface;
  * plugs it and reads the customer session, which cron does not have. Its three lines are repeated
  * here, plus the provider-specific additional information when the provider registers one
  * (Braintree's creates a payment method nonce from the token).
+ *
+ * Magento_InstantPurchase is optional (a store can remove it together with Magento_Paypal, Braintree and
+ * Payment Services), and setup:di:compile reads every constructor: so its IntegrationsManager is taken from
+ * the object manager by class name on first use, when the class exists, and never typed here
+ * (Test/Unit/Architecture/SubModulesCompileSafeTest).
  */
 class VaultStrategy implements StrategyInterface
 {
@@ -47,19 +53,22 @@ class VaultStrategy implements StrategyInterface
     /** @var PaymentTokenRepositoryInterface */
     private $tokenRepository;
 
-    /** @var IntegrationsManager|null */
+    /** @var ObjectManagerInterface */
+    private $objectManager;
+
+    /** @var IntegrationsManager|false|null false = Magento_InstantPurchase not installed; null = not looked up yet */
     private $integrations;
 
     public function __construct(
         OffSessionMethods $methods,
         PaymentTokenManagementInterface $tokenManagement,
         PaymentTokenRepositoryInterface $tokenRepository,
-        ?IntegrationsManager $integrations = null
+        ObjectManagerInterface $objectManager
     ) {
         $this->methods = $methods;
         $this->tokenManagement = $tokenManagement;
         $this->tokenRepository = $tokenRepository;
-        $this->integrations = $integrations;
+        $this->objectManager = $objectManager;
     }
 
     public function getCode(): string
@@ -189,13 +198,30 @@ class VaultStrategy implements StrategyInterface
     /** Provider-specific additional information registered for InstantPurchase (Braintree: a nonce). */
     private function providerInformation(PaymentTokenInterface $token, int $storeId): array
     {
-        if ($this->integrations === null) {
-            return [];
+        $integrations = $this->integrations();
+        if ($integrations === null) {
+            return []; // no Magento_InstantPurchase: the vault command resolves the token itself
         }
         try {
-            return (array)$this->integrations->getByToken($token, $storeId)->getAdditionalInformation($token);
+            return (array)$integrations->getByToken($token, $storeId)->getAdditionalInformation($token);
         } catch (LocalizedException $e) {
             return []; // no InstantPurchase integration: the vault command resolves the token itself
         }
+    }
+
+    /**
+     * The shared IntegrationsManager (what di.xml used to inject), or null without Magento_InstantPurchase (no
+     * declared return type: the class may not exist).
+     *
+     * @return IntegrationsManager|null
+     */
+    private function integrations()
+    {
+        if ($this->integrations === null) {
+            $this->integrations = class_exists(IntegrationsManager::class)
+                ? $this->objectManager->get(IntegrationsManager::class)
+                : false;
+        }
+        return $this->integrations === false ? null : $this->integrations;
     }
 }

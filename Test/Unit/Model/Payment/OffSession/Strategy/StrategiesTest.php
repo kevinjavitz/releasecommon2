@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Strategy;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\InstantPurchase\PaymentMethodIntegration\Integration;
+use Magento\InstantPurchase\PaymentMethodIntegration\IntegrationsManager;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Quote\Model\Quote;
@@ -64,7 +68,7 @@ class StrategiesTest extends TestCase
         return $t;
     }
 
-    private function vault(?PaymentTokenInterface $token, bool $isVaultCode = true): VaultStrategy
+    private function vault(?PaymentTokenInterface $token, bool $isVaultCode = true, ?ObjectManagerInterface $objectManager = null): VaultStrategy
     {
         $methods = $this->createStub(OffSessionMethods::class);
         $methods->method('vaultCodeFor')->willReturnMap([['braintree', 1, 'braintree_cc_vault']]);
@@ -79,7 +83,7 @@ class StrategiesTest extends TestCase
             }
             return $token;
         });
-        return new VaultStrategy($methods, $management, $repository);
+        return new VaultStrategy($methods, $management, $repository, $objectManager ?? $this->createStub(ObjectManagerInterface::class));
     }
 
     private function order(string $method, array $info = [], ?string $po = null): Order
@@ -129,6 +133,57 @@ class StrategiesTest extends TestCase
         self::assertSame(3, $this->info[PaymentTokenInterface::CUSTOMER_ID]);
         self::assertTrue($this->info[VaultConfigProvider::IS_ACTIVE_CODE]);
         self::assertSame('true', $this->info[StrategyInterface::PAYMENT_FLAG]);
+    }
+
+    /**
+     * Magento_InstantPurchase is optional, so VaultStrategy takes its IntegrationsManager from the object manager
+     * by name, on the first charge (not when the strategy is built), once; the provider's additional information
+     * (Braintree: a nonce) joins the payment as it did when di.xml injected the manager.
+     */
+    public function testVaultAddsTheInstantPurchaseProviderInformationResolvedOnFirstUse(): void
+    {
+        if (!class_exists(IntegrationsManager::class)) {
+            self::markTestSkipped('Magento_InstantPurchase is not installed');
+        }
+        $token = $this->token([]);
+        $integration = $this->createMock(Integration::class);
+        $integration->method('getAdditionalInformation')->with($token)->willReturn(['payment_method_nonce' => 'nonce-1']);
+        $manager = $this->createMock(IntegrationsManager::class);
+        $manager->expects($this->exactly(2))->method('getByToken')->with($token, 1)->willReturn($integration);
+        $objectManager = $this->createMock(ObjectManagerInterface::class);
+        $objectManager->expects($this->never())->method('create');
+        $calls = 0;
+        $objectManager->method('get')->willReturnCallback(function (string $class) use ($manager, &$calls) {
+            $calls++;
+            self::assertSame(IntegrationsManager::class, $class);
+            return $manager;
+        });
+        $vault = $this->vault($token, true, $objectManager);
+        self::assertSame(0, $calls, 'not resolved when the strategy is built');
+        $subject = new Subject(['payment_method' => 'braintree_cc_vault', 'vault_token_id' => 7]);
+        $vault->configureQuote($subject, $this->quote());
+        $vault->configureQuote($subject, $this->quote());
+        self::assertSame(1, $calls, 'resolved once');
+        self::assertSame('nonce-1', $this->info['payment_method_nonce']);
+        self::assertSame('ph7', $this->info[PaymentTokenInterface::PUBLIC_HASH]);
+        self::assertSame('true', $this->info[StrategyInterface::PAYMENT_FLAG]);
+    }
+
+    public function testVaultWithoutAnInstantPurchaseIntegrationForTheTokenAddsNothing(): void
+    {
+        if (!class_exists(IntegrationsManager::class)) {
+            self::markTestSkipped('Magento_InstantPurchase is not installed');
+        }
+        $manager = $this->createStub(IntegrationsManager::class);
+        $manager->method('getByToken')->willThrowException(new LocalizedException(__('Instant purchase integration not available for token.')));
+        $objectManager = $this->createStub(ObjectManagerInterface::class);
+        $objectManager->method('get')->willReturn($manager);
+        $this->vault($this->token([]), true, $objectManager)
+            ->configureQuote(new Subject(['payment_method' => 'braintree_cc_vault', 'vault_token_id' => 7]), $this->quote());
+        self::assertEqualsCanonicalizing(
+            [PaymentTokenInterface::CUSTOMER_ID, PaymentTokenInterface::PUBLIC_HASH, VaultConfigProvider::IS_ACTIVE_CODE, StrategyInterface::PAYMENT_FLAG],
+            array_keys($this->info)
+        );
     }
 
     public function testOfflineKeepsThePurchaseOrderNumberAndIsManual(): void
