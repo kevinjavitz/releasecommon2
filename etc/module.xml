@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="SalesIgniter_Common" setup_version="1.2.58">
+    <module name="SalesIgniter_Common" setup_version="1.2.59">
         <!-- 1.2.58: the off-session payment layer adds a column to quote and observes quote and order events -->
         <sequence>
             <module name="Magento_Quote"/>
