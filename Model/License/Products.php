@@ -23,6 +23,9 @@ class Products
         32870 => 'Magento 2 Rental Booking System Multi Source Inventory',
         32877 => 'Magento 2 Amasty RFQ Integration',
         32881 => 'Magento 2 Rental Booking Extension Multi-Vendor Marketplace',
+        // Request for Quote & Hide Price (salesigniter/releaserfq2): its own download and licence since
+        // RFQ 1.0.0 (2026-09-28); without it the RFQ License screen called every RFQ key "Not a Magento license"
+        39844 => 'Magento 2 Request for Quote & Hide Price',
     ];
 
     /**

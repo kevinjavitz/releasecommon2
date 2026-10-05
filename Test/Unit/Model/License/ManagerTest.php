@@ -134,6 +134,28 @@ class ManagerTest extends TestCase
         $this->assertCount(count(Products::ALL), $this->calls);
     }
 
+    public function testARequestForQuoteKeyIsFoundAndActivated(): void
+    {
+        // a key of the Request for Quote download (39844): invalid_item_id for every rental product
+        $this->server = function ($action, $itemId) {
+            if ($action === 'activate_license') {
+                return ['success' => true, 'license' => 'valid', 'item_id' => $itemId, 'expires' => '2027-09-28 23:59:59', 'site_count' => 1, 'license_limit' => 2];
+            }
+            return ['success' => true, 'item_id' => $itemId, 'license' => $itemId === 39844 ? 'site_inactive' : 'invalid_item_id'];
+        };
+        $status = $this->manager()->activate(self::KEY);
+
+        $this->assertSame('valid', $status['license']);
+        $this->assertSame(39844, $status['item_id']);
+        $this->assertSame('Magento 2 Request for Quote & Hide Price', $status['item_name']);
+        $this->assertSame('2027-09-28 23:59:59', $status['expires']);
+        $this->assertSame(['activate_license', 39844], [end($this->calls)[0], end($this->calls)[2]]);
+        $this->assertSame(
+            'https://rentalbookingsoftware.com/checkout/?edd_license_key=' . self::KEY . '&download_id=39844',
+            $this->manager()->renewalUrl($status)
+        );
+    }
+
     public function testAnUnreachableServerIsNotAnInvalidKey(): void
     {
         $this->server = fn () => null;
