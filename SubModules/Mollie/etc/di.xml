@@ -36,9 +36,4 @@
             </argument>
         </arguments>
     </type>
-    <type name="SalesIgniter\Common\SubModules\Mollie\Model\MollieStrategy">
-        <arguments>
-            <argument name="startTransaction" xsi:type="object">Mollie\Payment\Service\Mollie\StartTransaction\Proxy</argument>
-        </arguments>
-    </type>
 </config>

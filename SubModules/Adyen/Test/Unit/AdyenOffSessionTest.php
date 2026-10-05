@@ -28,6 +28,14 @@ use SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Fixture\Subject;
 #[AllowMockObjectsWithoutExpectations]
 class AdyenOffSessionTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // the sub-module is registered only where Adyen is installed; so are its tests
+        if (!class_exists(CheckoutResponseValidator::class)) {
+            $this->markTestSkipped('adyen/module-payment is not installed here');
+        }
+    }
+
     public function testAnOffSessionChargeIsContAuthWithTheRightProcessingModel(): void
     {
         $context = new MitContext();

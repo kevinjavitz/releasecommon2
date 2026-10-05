@@ -3,22 +3,90 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\SubModules\Mollie\Test\Unit;
 
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Sales\Api\Data\OrderInterface;
+use Mollie\Payment\Service\Mollie\StartTransaction;
+use Mollie\Payment\Service\Order\BuildTransaction;
+use Mollie\Payment\Service\Order\TransactionPartInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SalesIgniter\Common\Model\Payment\OffSession\Decline;
 use SalesIgniter\Common\Model\Payment\OffSession\MitContext;
 use SalesIgniter\Common\SubModules\Mollie\Model\DeclineMapper;
 use SalesIgniter\Common\SubModules\Mollie\Model\MitTransactionPart;
+use SalesIgniter\Common\SubModules\Mollie\Model\MollieStrategy;
 use SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Fixture\Subject;
 
 /**
  * The Mollie sub-module without a Mollie account: the recurring transaction body and the decline
  * classes. The mandate flow itself waits for a test key. Moved from the subscriptions Mollie
- * sub-module.
+ * sub-module. The tests that need Mollie's own classes skip where mollie/magento2 is not installed.
  */
 class MollieOffSessionTest extends TestCase
 {
+    private function requireMollie(string $class): void
+    {
+        if (!class_exists($class) && !interface_exists($class)) {
+            $this->markTestSkipped('mollie/magento2 is not installed here');
+        }
+    }
+
+    public function testThePartHasTheMethodOfMolliesTransactionPartInterface(): void
+    {
+        // MitTransactionPart does not declare the interface (SubModulesCompileSafeTest), so this is what keeps them in step
+        $this->requireMollie(TransactionPartInterface::class);
+        $describe = static function (\ReflectionMethod $m): array {
+            $params = [];
+            foreach ($m->getParameters() as $p) {
+                $params[] = [(string)$p->getType(), $p->isOptional(), $p->isVariadic()];
+            }
+            return [$m->getName(), $params, (string)$m->getReturnType()];
+        };
+        $part = new \ReflectionClass(MitTransactionPart::class);
+        $interface = new \ReflectionClass(TransactionPartInterface::class);
+        self::assertNotEmpty($interface->getMethods());
+        foreach ($interface->getMethods() as $method) {
+            self::assertTrue($part->hasMethod($method->getName()), $method->getName());
+            self::assertSame($describe($method), $describe($part->getMethod($method->getName())));
+        }
+    }
+
+    public function testMolliesBuildTransactionRunsThePartLast(): void
+    {
+        $this->requireMollie(BuildTransaction::class);
+        $context = new MitContext();
+        $mollieOwn = $this->createStub(TransactionPartInterface::class);
+        $mollieOwn->method('process')->willReturnCallback(fn($order, array $t) => $t + ['sequenceType' => 'oneoff', 'cardToken' => 'tkn_x']);
+        $build = new BuildTransaction(['sequenceType' => $mollieOwn, 'zzSicommonMit' => new MitTransactionPart($context)]);
+        $order = $this->createStub(OrderInterface::class);
+        self::assertSame(['method' => 'creditcard', 'sequenceType' => 'oneoff', 'cardToken' => 'tkn_x'], $build->execute($order, ['method' => 'creditcard']), 'a customer checkout');
+        $s = new Subject(['payment_data' => ['mollie_customer_id' => 'cst_1', 'mollie_mandate_id' => 'mdt_1', 'mollie_method' => 'creditcard']]);
+        $out = $context->run($s, false, fn() => $build->execute($order, ['method' => 'ideal']));
+        self::assertSame(['method' => 'creditcard', 'sequenceType' => 'recurring', 'customerId' => 'cst_1', 'mandateId' => 'mdt_1'], $out);
+    }
+
+    public function testTheStrategyStartsTheTransactionWithMolliesSharedServiceOnFirstUse(): void
+    {
+        $this->requireMollie(StartTransaction::class);
+        $start = $this->createMock(StartTransaction::class);
+        $order = $this->createStub(OrderInterface::class);
+        $start->expects($this->exactly(2))->method('execute')->with($order);
+        $om = $this->createMock(ObjectManagerInterface::class);
+        $om->expects($this->once())->method('get')->with(StartTransaction::class)->willReturn($start);
+        $strategy = new MollieStrategy($this->createStub(CustomerRepositoryInterface::class), $om);
+        $strategy->afterOrderPlaced(new Subject(), $order);
+        $strategy->afterOrderPlaced(new Subject(), $order);
+    }
+
+    public function testBuildingTheStrategyResolvesNothingFromMollie(): void
+    {
+        $om = $this->createMock(ObjectManagerInterface::class);
+        $om->expects($this->never())->method('get');
+        $om->expects($this->never())->method('create');
+        self::assertSame('mollie', (new MollieStrategy($this->createStub(CustomerRepositoryInterface::class), $om))->getCode());
+    }
+
     public function testACustomerCheckoutIsUntouched(): void
     {
         $part = new MitTransactionPart(new MitContext());

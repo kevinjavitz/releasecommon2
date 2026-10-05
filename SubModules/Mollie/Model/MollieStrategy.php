@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace SalesIgniter\Common\SubModules\Mollie\Model;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
 use Mollie\Payment\Service\Mollie\StartTransaction;
@@ -25,6 +26,11 @@ use SalesIgniter\Common\Model\Payment\OffSession\StrategyInterface;
  *    transaction into sequenceType=recurring for the customer's mandate; afterOrderPlaced() starts it
  *    (Mollie starts transactions from its redirect controller otherwise). The result is asynchronous:
  *    the webhook invoices the order and the consumer's invoice observer settles its row.
+ *
+ * Mollie's StartTransaction is taken from the object manager by name when afterOrderPlaced() first needs it
+ * (as the StartTransaction\Proxy this sub-module's di.xml used to inject did), so no Mollie type is in the
+ * constructor: setup:di:compile reads every constructor under SubModules/*, also on stores without Mollie,
+ * where this sub-module is not registered (Test/Unit/Architecture/SubModulesCompileSafeTest).
  */
 class MollieStrategy implements StrategyInterface
 {
@@ -46,13 +52,16 @@ class MollieStrategy implements StrategyInterface
     /** @var CustomerRepositoryInterface */
     private $customers;
 
-    /** @var StartTransaction */
+    /** @var ObjectManagerInterface */
+    private $objectManager;
+
+    /** @var StartTransaction|null */
     private $startTransaction;
 
-    public function __construct(CustomerRepositoryInterface $customers, StartTransaction $startTransaction)
+    public function __construct(CustomerRepositoryInterface $customers, ObjectManagerInterface $objectManager)
     {
         $this->customers = $customers;
-        $this->startTransaction = $startTransaction;
+        $this->objectManager = $objectManager;
     }
 
     public function getCode(): string
@@ -106,7 +115,16 @@ class MollieStrategy implements StrategyInterface
 
     public function afterOrderPlaced(ChargeSubjectInterface $subject, OrderInterface $order): void
     {
-        $this->startTransaction->execute($order);
+        $this->startTransaction()->execute($order);
+    }
+
+    /** @return StartTransaction the shared instance, resolved on first use as the proxy did */
+    private function startTransaction()
+    {
+        if ($this->startTransaction === null) {
+            $this->startTransaction = $this->objectManager->get(StartTransaction::class);
+        }
+        return $this->startTransaction;
     }
 
     private function mollieCustomerId(int $customerId): string

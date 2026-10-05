@@ -21,6 +21,14 @@ use SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Fixture\Subject;
  */
 class BraintreeOffSessionTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // the sub-module is registered only where Braintree is installed; so are its tests
+        if (!class_exists(TransactionSourceDataBuilder::class)) {
+            $this->markTestSkipped('paypal/module-braintree-core is not installed here');
+        }
+    }
+
     public function testAnOffSessionChargeIsSentAsRecurringOrUnscheduled(): void
     {
         $context = new MitContext();

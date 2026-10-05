@@ -5,6 +5,7 @@ namespace SalesIgniter\Common\SubModules\TokenBase\Test\Unit;
 
 use Magento\Framework\Event;
 use Magento\Framework\Event\Observer;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Quote\Model\Quote;
@@ -36,6 +37,14 @@ use SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Fixture\Subject;
 #[AllowMockObjectsWithoutExpectations]
 class TokenBaseOffSessionTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // the sub-module is registered only where TokenBase is installed; so are its tests
+        if (!interface_exists(CardRepositoryInterface::class)) {
+            $this->markTestSkipped('paradoxlabs/tokenbase is not installed here');
+        }
+    }
+
     private function subject(array $paymentData = ['strategy' => 'tokenbase', 'tokenbase_card_id' => 12]): Subject
     {
         return new Subject(['customer_id' => 7, 'store_id' => 1, 'payment_method' => 'authnetcim', 'payment_data' => $paymentData]);
@@ -65,7 +74,10 @@ class TokenBaseOffSessionTest extends TestCase
         $helper->method('getMethodInstance')->willReturn($method);
         $time = $this->createStub(Clock::class);
         $time->method('nowString')->willReturn('2026-10-01 00:00:00');
-        return new TokenBaseStrategy($cards, $helper, $time);
+        // TokenBase's card repository comes from the object manager, by name, once
+        $om = $this->createMock(ObjectManagerInterface::class);
+        $om->expects($this->once())->method('get')->with(CardRepositoryInterface::class)->willReturn($cards);
+        return new TokenBaseStrategy($om, $helper, $time);
     }
 
     public function testTheFirstOrderRemembersTheCardAndMethod(): void
@@ -105,6 +117,9 @@ class TokenBaseOffSessionTest extends TestCase
 
     public function testAuthorizeNetOffSessionChargesAreMerchantInitiated(): void
     {
+        if (!class_exists(Gateway::class)) {
+            $this->markTestSkipped('paradoxlabs/authnetcim is not installed here');
+        }
         $context = new MitContext();
         $plugin = new AuthnetcimMit($context);
         $gateway = $this->getMockBuilder(Gateway::class)->disableOriginalConstructor()->onlyMethods(['setParameter'])->getMock();

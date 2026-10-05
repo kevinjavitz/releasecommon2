@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\SubModules\Stripe\Test\Unit;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Payment as QuotePayment;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -24,6 +26,7 @@ use SalesIgniter\Common\SubModules\Stripe\Plugin\SaveCardForOffSession;
 use SalesIgniter\Common\Test\Unit\Model\Payment\OffSession\Fixture\Subject;
 use Stripe\Exception\CardException;
 use Stripe\PaymentIntent;
+use StripeIntegration\Payments\Helper\Generic as StripeHelper;
 use StripeIntegration\Payments\Model\Checkout\Flow;
 use StripeIntegration\Payments\Model\Config as StripeConfig;
 
@@ -37,6 +40,23 @@ class StripeOffSessionTest extends TestCase
 {
     /** @var string[] references saved */
     private $saved = [];
+
+    protected function setUp(): void
+    {
+        // the sub-module is registered only where the Stripe module is installed; so are its tests
+        if (!class_exists(Flow::class)) {
+            $this->markTestSkipped('stripe/stripe-payments is not installed here');
+        }
+    }
+
+    /** @param array<string, object> $objects class name => the instance the object manager hands out */
+    private function objectManager(array $objects): ObjectManagerInterface
+    {
+        $om = $this->createMock(ObjectManagerInterface::class);
+        $om->expects($this->exactly(count($objects)))->method('get')
+            ->willReturnCallback(fn(string $type) => $objects[$type] ?? self::fail('unexpected object manager get(' . $type . ')'));
+        return $om;
+    }
 
     private function subject(array $paymentData): Subject
     {
@@ -70,7 +90,8 @@ class StripeOffSessionTest extends TestCase
         $saver->method('save')->willReturnCallback(function (ChargeSubjectInterface $s) {
             $this->saved[] = $s->getOffSessionReference();
         });
-        return new StripeStrategy($gateway, $flow ?? new Flow(), $config, $saver, $this->createStub(LoggerInterface::class));
+        $om = $this->objectManager([Flow::class => $flow ?? new Flow(), StripeConfig::class => $config]);
+        return new StripeStrategy($gateway, $om, $saver, $this->createStub(LoggerInterface::class));
     }
 
     private function intent(array $values): PaymentIntent
@@ -164,6 +185,31 @@ class StripeOffSessionTest extends TestCase
         $this->strategy($gateway, $flow)->afterOrderPlaced($s, $order);
         self::assertNull($flow->creatingOrderFromCharge);
         self::assertArrayNotHasKey('stripe_pending', $s->getPaymentData());
+    }
+
+    public function testTheStrategyUsesTheStripeModulesSharedCheckoutFlow(): void
+    {
+        $flow = new Flow();
+        $config = $this->createStub(StripeConfig::class);
+        $gateway = $this->createStub(StripeGateway::class);
+        $gateway->method('chargeOffSession')->willReturn($this->intent(['id' => 'pi_SHARED', 'status' => 'succeeded', 'amount' => 3000]));
+        $saver = $this->createStub(SubjectSaverInterface::class);
+        $saver->method('supports')->willReturn(true);
+        // the object manager is asked once per Stripe object, by class name, when the strategy is built
+        $strategy = new StripeStrategy($gateway, $this->objectManager([Flow::class => $flow, StripeConfig::class => $config]), $saver, $this->createStub(LoggerInterface::class));
+        $strategy->configureQuote($this->subject(['stripe_customer_id' => 'cus_T1', 'stripe_payment_method' => 'pm_T1']), $this->quote(30.0));
+        self::assertSame(['payment_intent' => 'pi_SHARED'], $flow->creatingOrderFromCharge, 'the instance the Stripe module reads when it places the order');
+    }
+
+    public function testTheGatewayCallsStripeThroughTheStripeModulesConfiguredClient(): void
+    {
+        $config = $this->createMock(StripeConfig::class);
+        $config->expects($this->once())->method('initStripe')->with(null, 3);
+        $config->method('getStripeClient')->willReturn(null);
+        $gateway = new StripeGateway($this->objectManager([StripeConfig::class => $config, StripeHelper::class => $this->createStub(StripeHelper::class)]));
+        $this->expectException(LocalizedException::class);
+        $this->expectExceptionMessage('Stripe is not configured for this store (API keys).');
+        $gateway->retrievePaymentIntent('pi_X', 3);
     }
 
     public static function declines(): array

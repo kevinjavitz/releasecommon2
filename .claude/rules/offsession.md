@@ -42,7 +42,22 @@ gateway's code is installed (`registration.php` asks the Composer class loaders 
 common is on every Sales Igniter store, `setup:upgrade` auto-enables every newly registered module,
 and a class implementing a missing gateway interface fatals `setup:di:compile`. No `setup_version`,
 no patches, no tables in sub-modules. Their unit tests live in `SubModules/<Gw>/Test/Unit` and run
-with the gateway's vendor code (skip the path where a gateway is not installed).
+with the gateway's vendor code (they skip where the gateway is not installed).
+
+**Registration is not enough: `setup:di:compile` scans `SubModules/*` anyway**, as part of
+SalesIgniter_Common's directory, also where the sub-module is not registered. It loads every class and
+reads its constructor and parents, so NO class under `SubModules/` may extend, implement or use (trait)
+a gateway type, or take one in its constructor (type or default value). Gateway objects come from
+`ObjectManagerInterface::get(<Gateway>::class)` instead: in the constructor where the old code injected
+them (StripeStrategy: `Checkout\Flow`, `Config`; StripeGateway: `Config`, `Helper\Generic`;
+TokenBaseStrategy: `CardRepositoryInterface`; the same shared instances), on first use where the old
+di.xml injected a proxy (MollieStrategy: `StartTransaction`). `Mollie\MitTransactionPart` has
+`TransactionPartInterface::process()` without declaring the interface (BuildTransaction calls each part
+without a type check; the Mollie test pins the signature and runs a real BuildTransaction). Plugin
+method signatures and `SubModules/<Gw>/etc/*.xml` may name gateway types (never resolved by the
+compiler / read only where registered); common's own `etc/` may not. 1.2.58 as first merged broke
+compile on every store without Stripe or without TokenBase (and would have without Mollie); fixed
+before its release (2026-10-05).
 
 Stays in the consumers: subscriptions' renewal policy, dunning, RefuseBothKinds / Stripe Billing
 rules, the first-order `recurring_first` (Braintree) and Adyen "Subscription" first-order flags,
@@ -55,6 +70,13 @@ Mollie's "order contains a subscription" rule.
   consumers' `salesigniter/releasecommon2` requirement.
 - `Test/Unit/Architecture/NoConsumerDependencyTest`: the layer never names `SalesIgniter\Rental`,
   `SalesIgniter_Rental`, `SalesIgniter\Subscriptions` or `SalesIgniter_Subscriptions`.
+- `Test/Unit/Architecture/SubModulesCompileSafeTest`: no class in the package (Test/ aside) names a
+  gateway type where the compiler reads it (tokenizer: parents, interfaces, traits, constructor types
+  and defaults); every `SubModules/` class is read the compiler's way (`ClassReader::getConstructor()` /
+  `getParents()`) in a child PHP where every gateway namespace throws on autoload, i.e. a store with no
+  gateway, whatever this dev site has installed; every `SubModules/` directory is registered behind a
+  gateway marker; common's `etc/` names no gateway class. A new gateway sub-module adds its namespace
+  to the test's `GATEWAY_NAMESPACES`.
 - This is the first schema common owns (`etc/db_schema.xml`: `sicommon_pay_token`,
   `quote.sicommon_restore_quote_id`); CLAUDE.md's "owns no database tables" predates 1.2.58.
 

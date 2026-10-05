@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\SubModules\TokenBase\Model;
 
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -25,6 +26,11 @@ use SalesIgniter\Common\Model\Payment\OffSession\StrategyInterface;
  * A later charge pays with the same method and card: importData(['card_id' => card hash]) plus
  * is_subscription_generated = 1, which makes TokenBase skip the CVV and send the gateway's recurring
  * flags (Authorize.Net recurringBilling; CyberSource merchant-initiated recurring). Synchronous.
+ *
+ * TokenBase's CardRepositoryInterface is taken from the object manager by name in the constructor, the same
+ * shared instance constructor injection gave, so no TokenBase type is in the constructor: setup:di:compile
+ * reads every constructor under SubModules/*, also on stores without TokenBase, where this sub-module is not
+ * registered (Test/Unit/Architecture/SubModulesCompileSafeTest).
  */
 class TokenBaseStrategy implements StrategyInterface
 {
@@ -37,9 +43,9 @@ class TokenBaseStrategy implements StrategyInterface
     /** @var Clock */
     private $time;
 
-    public function __construct(CardRepositoryInterface $cards, PaymentHelper $paymentHelper, Clock $time)
+    public function __construct(ObjectManagerInterface $objectManager, PaymentHelper $paymentHelper, Clock $time)
     {
-        $this->cards = $cards;
+        $this->cards = $objectManager->get(CardRepositoryInterface::class);
         $this->paymentHelper = $paymentHelper;
         $this->time = $time;
     }

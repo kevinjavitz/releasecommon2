@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\SubModules\Stripe\Model;
 
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
 use Psr\Log\LoggerInterface;
@@ -35,6 +36,11 @@ use StripeIntegration\Payments\Model\Config as StripeConfig;
  * - a charge that succeeded but whose order failed is reused for the next attempt with the same
  *   subject reference (payment_data.stripe_pending, saved at once through SubjectSaverInterface),
  *   never charged twice.
+ *
+ * The Stripe module's Checkout\Flow and Config are taken from the object manager by name in the constructor,
+ * the same shared instances constructor injection gave, so no Stripe type is in the constructor:
+ * setup:di:compile reads every constructor under SubModules/*, also on stores without Stripe, where this
+ * sub-module is not registered (Test/Unit/Architecture/SubModulesCompileSafeTest).
  */
 class StripeStrategy implements StrategyInterface
 {
@@ -52,11 +58,11 @@ class StripeStrategy implements StrategyInterface
     /** @var LoggerInterface */
     private $logger;
 
-    public function __construct(StripeGateway $gateway, Flow $flow, StripeConfig $stripeConfig, SubjectSaverInterface $saver, LoggerInterface $logger)
+    public function __construct(StripeGateway $gateway, ObjectManagerInterface $objectManager, SubjectSaverInterface $saver, LoggerInterface $logger)
     {
         $this->gateway = $gateway;
-        $this->flow = $flow;
-        $this->stripeConfig = $stripeConfig;
+        $this->flow = $objectManager->get(Flow::class);
+        $this->stripeConfig = $objectManager->get(StripeConfig::class);
         $this->saver = $saver;
         $this->logger = $logger;
     }

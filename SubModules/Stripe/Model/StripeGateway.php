@@ -7,12 +7,18 @@ declare(strict_types=1);
 
 namespace SalesIgniter\Common\SubModules\Stripe\Model;
 
+use Magento\Framework\ObjectManagerInterface;
 use StripeIntegration\Payments\Helper\Generic as StripeHelper;
 use StripeIntegration\Payments\Model\Config as StripeConfig;
 
 /**
  * The few Stripe API calls the off-session charges need, through the Stripe module's own configured client (its
  * keys, mode and API version for the store being charged). One class so tests can replace it.
+ *
+ * The Stripe module's Config and Generic helper are taken from the object manager by name, the same shared
+ * instances constructor injection gave, so no Stripe type is in the constructor: setup:di:compile reads every
+ * constructor under SubModules/*, also on stores without Stripe, where this sub-module is not registered
+ * (Test/Unit/Architecture/SubModulesCompileSafeTest).
  */
 class StripeGateway
 {
@@ -21,10 +27,10 @@ class StripeGateway
     /** @var StripeHelper */
     private $helper;
 
-    public function __construct(StripeConfig $config, StripeHelper $helper)
+    public function __construct(ObjectManagerInterface $objectManager)
     {
-        $this->config = $config;
-        $this->helper = $helper;
+        $this->config = $objectManager->get(StripeConfig::class);
+        $this->helper = $objectManager->get(StripeHelper::class);
     }
 
     /**

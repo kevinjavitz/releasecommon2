@@ -30,11 +30,17 @@ files through the component registrar and skip where rental is not installed. 13
 ## Tests
 
 ```bash
-ddev exec vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist extensions/salesigniter/releasecommon2/Test/Unit
+timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpunit-unit.xml extensions/salesigniter/releasecommon2/Test/Unit
+timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpunit-unit.xml extensions/salesigniter/releasecommon2/SubModules
 ```
 
-138 unit tests (1.2.57), no database. **Judge by the `OK` / `FAILURES` line, not the exit status** — every run ends
-with the same Allure-bootstrap warning the rest of this project has, which alone makes the status 1.
+The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
+1.2.57; 394 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58, no database. The sub-module tests skip
+where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
+the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
+
+`Test/Unit/Architecture/SubModulesCompileSafeTest` guards `setup:di:compile` on stores without a gateway: see
+`.claude/rules/offsession.md`, "Gateway sub-modules".
 
 There are no integration tests. Nothing in this module talks to the database except through EAV setup
 objects it is handed, so mocks reach further here than a fixture install would.
