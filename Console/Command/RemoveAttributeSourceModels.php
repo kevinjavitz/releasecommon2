@@ -157,7 +157,10 @@ class RemoveAttributeSourceModels extends Command
             // 1.2.56: missing until now. Its backend (SirentBackendConfig) needs the rental module's
             // DI, so with the module disabled every product page died on "Cannot instantiate
             // interface SalesIgniter\Rental\Api\FixedRentalDatesRepositoryInterface".
-            'sirent_minmaxhidecalendar'
+            'sirent_minmaxhidecalendar',
+            // 1.2.59: "Also charge the return day" (rental 1.2.214's BookedByProductSettings data patch) has the
+            // same SirentBackendConfig backend, and a source in the rental module too.
+            'sirent_charge_return_day'
         ];
 
 
