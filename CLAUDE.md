@@ -27,6 +27,32 @@ class name, so its own code, add-ons and generated interceptors are unaffected.
 `Test/Unit/Setup/ModuleRemoval/{DbSchemaReader,SystemConfigReader}Test` read releaserental2's real
 files through the component registrar and skip where rental is not installed. 138 unit tests.
 
+## Settings search (1.2.60, pending)
+
+A "Find a setting" box on top of every section of the `salesigniter` config tab (Stores > Configuration: Rental,
+Request for Quote, Subscriptions, whatever the store has). It filters the page as the admin types: matching settings
+stay, their groups open, the rest hides, the words are marked; it matches labels, comments, tooltips, group names and
+setting paths (`license/key`, also the `config_path` a field saves to). "Also in:" links the other Sales Igniter
+sections that match, with counts (`?config_search=<term>` pre-fills the box there, then leaves the address).
+
+| File | What |
+|---|---|
+| `Model/Config/Search/IndexBuilder` | reads the config structure (every section of the tabs in its `tabs` di argument, default `['salesigniter']`) into `{sections: [{id, label, url, groups, fields}]}`; fields carry path, label, comment, tooltip, hint, `config_path` and their `depends` as DOM ids. `sectionIds()` is cheap (no fields); `build()` once per page. Comment models and tooltip blocks are skipped (they may call licence servers) |
+| `Block/Adminhtml/System/Config/Search` + `templates/system/config/search.phtml` | the box, only on searchable sections; the index goes in a `<script type="application/json">` (no `<` or `>` survives), the section on screen without its words (read from the page) |
+| `view/adminhtml/web/js/config-search.js`, `css/config-search.css` | the filter. Every change it makes is a class or a `<mark>` it removes again: Esc / the clear button put the form back byte for byte. Groups it opens are closed again in the saved state on Save Config (a group the admin opened by hand stays open). A match hidden by a `depends` shows its visible master with "Change this to show N more matching settings." Min 2 characters, words in any order, accents ignored |
+| `etc/` | nothing: the layout handle `adminhtml_system_config_edit` adds the block on every config page and it renders nothing outside the tab |
+
+Core's header search (`Magento\Backend\Model\Search\Config`) only finds labels and jumps to a group; this one
+filters in the page. Not a GraphQL/REST feature. Translations: 13 phrases in `i18n/en_US.csv`.
+
+Tests: `Test/Unit/Model/Config/Search/IndexBuilderTest` and `Test/Unit/Block/Adminhtml/System/Config/SearchTest`;
+the browser test `Test/E2e/config-search.e2e.js` (37 stages: typing, counts and live region, path search,
+dependencies, Enter, Use system value, Save Config guard, Esc/clear restore, empty state, the "Also in" link
+landing pre-filled, website scope, no box on other sections, no browser errors). It makes one throwaway admin user
+(`Test/E2e/config-search-fixtures.php`, random password, deleted at the end) and saves nothing. Run it on the
+database clone through releaserental2's `run-on-clone.php` (command in the file's header), under
+`~/.local/bin/heavy` + `test-slot`, or against a running dev site with `MAGE_BASE_URL=https://<site>.ddev.site`.
+
 ## Tests
 
 ```bash
@@ -36,7 +62,7 @@ timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpun
 
 The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
 1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58 (403 in `Test/Unit` with 1.2.59's
-command fix), no database. The sub-module tests skip
+command fix; 434 with 1.2.60's settings search), no database. The sub-module tests skip
 where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
 the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
 
