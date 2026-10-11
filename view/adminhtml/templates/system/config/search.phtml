@@ -1,0 +1,40 @@
+<?php
+/**
+ * The settings search box (SalesIgniter\Common\Block\Adminhtml\System\Config\Search). Everything it shows while
+ * the box is empty is rendered here, so the page does not move when the script starts; the results line and the
+ * status text only fill in while searching.
+ *
+ * @var \SalesIgniter\Common\Block\Adminhtml\System\Config\Search $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$query = $block->getInitialQuery();
+?>
+<div class="si-cfg-search" id="si-cfg-search" role="search"
+     aria-label="<?= $escaper->escapeHtmlAttr(__('Settings search')) ?>">
+    <div class="si-cfg-search__bar">
+        <label class="si-cfg-search__label" for="si-cfg-search-input"><?= $escaper->escapeHtml(__('Find a setting')) ?></label>
+        <div class="si-cfg-search__field">
+            <input type="search" id="si-cfg-search-input" class="admin__control-text si-cfg-search__input"
+                   value="<?= $escaper->escapeHtmlAttr($query) ?>"
+                   placeholder="<?= $escaper->escapeHtmlAttr(__('Type a label, help text or setting path')) ?>"
+                   autocomplete="off" spellcheck="false" maxlength="100"
+                   aria-describedby="si-cfg-search-help" aria-controls="config-edit-form"/>
+            <button type="button" class="si-cfg-search__clear"<?= $query === '' ? ' hidden' : '' ?>
+                    title="<?= $escaper->escapeHtmlAttr(__('Clear search')) ?>"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Clear search')) ?>"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <span class="si-cfg-search__count" aria-hidden="true"></span>
+        <span class="si-cfg-search__sr" id="si-cfg-search-status" role="status" aria-live="polite" aria-atomic="true"></span>
+    </div>
+    <p class="si-cfg-search__sr" id="si-cfg-search-help"><?= $escaper->escapeHtml(
+        __('Filters the settings below as you type, by label, help text and setting path, and lists the other Sales Igniter sections that match. Enter goes to the first match; Esc clears the search.')
+    ) ?></p>
+    <div class="si-cfg-search__results" hidden>
+        <p class="si-cfg-search__also">
+            <span class="si-cfg-search__also-label"><?= $escaper->escapeHtml(__('Also in:')) ?></span>
+            <span class="si-cfg-search__also-links"></span>
+        </p>
+    </div>
+</div>
+<script type="application/json" id="si-cfg-search-index"><?= /* @noEscape */ $block->getIndexJson() ?></script>
+<script type="text/x-magento-init"><?= /* @noEscape */ $block->getInitJson() ?></script>

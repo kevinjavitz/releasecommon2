@@ -1,0 +1,120 @@
+/* Stores > Configuration, Sales Igniter sections: the settings search (SalesIgniter_Common). Admin rem = 10px. */
+.si-cfg-search {
+    margin: 0 0 2rem;
+    padding: 1.2rem 1.5rem;
+    background: #f8f8f8;
+    border: 1px solid #e3e3e3;
+}
+.si-cfg-search [hidden] {
+    display: none !important;
+}
+.si-cfg-search__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .8rem 1.5rem;
+    min-height: 3.3rem;
+}
+.si-cfg-search__label {
+    font-weight: 600;
+    color: #303030;
+}
+.si-cfg-search__field {
+    position: relative;
+    flex: 0 1 48rem;
+    min-width: 22rem;
+}
+.si-cfg-search .si-cfg-search__input {
+    width: 100%;
+    padding-right: 3.6rem;
+}
+.si-cfg-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+.si-cfg-search__clear {
+    position: absolute;
+    top: 50%;
+    right: .3rem;
+    transform: translateY(-50%);
+    min-width: 2.8rem;
+    height: 2.8rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #514943;
+    font-size: 2rem;
+    line-height: 2.8rem;
+    cursor: pointer;
+}
+.si-cfg-search__clear:hover {
+    color: #000;
+}
+.si-cfg-search__clear:focus {
+    outline: 2px solid #007bdb;
+    outline-offset: -2px;
+}
+.si-cfg-search__count {
+    color: #514943;
+}
+.si-cfg-search.is-empty .si-cfg-search__count {
+    color: #b30000;
+}
+.si-cfg-search__results {
+    margin-top: .8rem;
+}
+.si-cfg-search__results p {
+    margin: .4rem 0 0;
+}
+.si-cfg-search__also-label {
+    font-weight: 600;
+    margin-right: .6rem;
+}
+.si-cfg-search__also-links a {
+    display: inline-block;
+    margin-right: 1.5rem;
+}
+.si-cfg-search__sr {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* on the settings form while searching */
+#config-edit-form .si-cfg-search-hide {
+    display: none !important;
+}
+#config-edit-form mark.si-cfg-search-mark {
+    padding: 0;
+    border-radius: 2px;
+    background: #fff1a8;
+    box-shadow: 0 0 0 1px #f0d264;
+    color: inherit;
+}
+#config-edit-form .si-cfg-search-path {
+    margin-top: .4rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #6b6b6b;
+    word-break: break-all;
+}
+#config-edit-form .si-cfg-search-path code {
+    font-size: 1.2rem;
+    background: none;
+}
+#config-edit-form .si-cfg-search-hint {
+    margin-top: .5rem;
+    font-size: 1.2rem;
+    color: #6b6b6b;
+    font-style: italic;
+}
+#config-edit-form .si-cfg-search-tip .help {
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #f0d264;
+}

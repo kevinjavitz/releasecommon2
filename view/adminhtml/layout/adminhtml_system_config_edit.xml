@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+Stores > Configuration: the settings search at the top of every Sales Igniter section (the block renders nothing
+on other sections). SalesIgniter\Common\Block\Adminhtml\System\Config\Search
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="SalesIgniter_Common::css/config-search.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="SalesIgniter\Common\Block\Adminhtml\System\Config\Search" name="salesigniter.config.search"
+                   before="system.config.edit" template="SalesIgniter_Common::system/config/search.phtml"/>
+        </referenceContainer>
+    </body>
+</page>
