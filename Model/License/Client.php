@@ -7,7 +7,8 @@ use Psr\Log\LoggerInterface;
 /**
  * The EDD Software Licensing API on rentalbookingsoftware.com: `check_license`,
  * `activate_license` and `deactivate_license`, the same three calls the WooCommerce add-on
- * makes (sibooking Admin/License.php). POST, so the key stays out of access logs.
+ * makes (sibooking Admin/License.php), and the store's own `si_site_role` (this site is the
+ * live or the staging site of its licence, 1.2.61). POST, so the key stays out of access logs.
  */
 class Client
 {
@@ -23,11 +24,13 @@ class Client
     }
 
     /**
-     * @param string $action check_license | activate_license | deactivate_license
+     * @param string $action check_license | activate_license | deactivate_license | si_site_role
+     * @param array $extra more POST fields (the staging-site role, the signed si_site_role fields); the four
+     *                     above always win
      * @return array|null the decoded answer, or null when the store could not be reached or did
      *                    not answer JSON -- never an exception, a licence check must not break a page
      */
-    public function call(string $action, string $key, int $itemId, string $siteUrl): ?array
+    public function call(string $action, string $key, int $itemId, string $siteUrl, array $extra = []): ?array
     {
         try {
             $curl = $this->curlFactory->create();
@@ -37,7 +40,7 @@ class Client
                 'license' => $key,
                 'item_id' => $itemId,
                 'url' => $siteUrl,
-            ]);
+            ] + $extra);
             if ($curl->getStatus() !== 200) {
                 $this->logger->warning('Sales Igniter license ' . $action . ': HTTP ' . $curl->getStatus());
                 return null;
