@@ -13,6 +13,13 @@ use SalesIgniter\Common\Model\License\Products;
  * renew-early link; expired, with the renewal link EDD itself would give; and each way a key can
  * be refused, in words that say what to do about it. "Check now" re-asks immediately; otherwise
  * the answer is at most twelve hours old (Manager::STALE_AFTER).
+ *
+ * Live and staging site (1.2.61), when rentalbookingsoftware.com labels this store: "This store: Live site" (or
+ * Staging site, or Local copy) with what the licence covers, and a "Make this the staging site" / "Make this the
+ * live site" button (salesigniter_common/license/siterole) when it covers a staging site; the store's own words
+ * (si_message) when it has some; and, while the key is not active here, a "This is a staging site" checkbox that
+ * the key's save reads (Model\Config\Backend\LicenseKey). It starts ticked when the key's live spot is used
+ * elsewhere or Magento is in developer mode.
  */
 class LicenseStatus extends \Magento\Config\Block\System\Config\Form\Field
 {
@@ -32,6 +39,9 @@ class LicenseStatus extends \Magento\Config\Block\System\Config\Form\Field
     /** @var array route params of the "Check now" link */
     private $refreshParams;
 
+    /** @var \Magento\Framework\App\State|null */
+    private $appState;
+
     /**
      * $accountLink is optional and last so an interceptor generated for the old constructor keeps
      * working until the next setup:di:compile.
@@ -42,9 +52,11 @@ class LicenseStatus extends \Magento\Config\Block\System\Config\Form\Field
         array $data = [],
         ?AccountLink $accountLink = null,
         string $refreshRoute = 'salesigniter_rental/license/refresh',
-        array $refreshParams = []
+        array $refreshParams = [],
+        ?\Magento\Framework\App\State $appState = null
     ) {
         parent::__construct($context, $data);
+        $this->appState = $appState;
         $this->refreshRoute = $refreshRoute;
         $this->refreshParams = $refreshParams;
         $this->licenseManager = $licenseManager;
@@ -76,7 +88,7 @@ class LicenseStatus extends \Magento\Config\Block\System\Config\Form\Field
                 $this->accountLink->sentence(__(
                     'Enter your license key above and save. You can find your keys in %1 on rentalbookingsoftware.com. Updates for Sales Igniter extensions are downloaded with this key.',
                     AccountLink::TOKEN
-                )));
+                ))) . $this->stagingCheckbox(null);
         }
 
         $product = $this->escapeHtml($status['item_name'] ?? '');
@@ -150,7 +162,86 @@ class LicenseStatus extends \Magento\Config\Block\System\Config\Form\Field
             '<a href="' . $this->escapeUrl($this->getUrl($this->refreshRoute ?: 'salesigniter_rental/license/refresh', $this->refreshParams ?: [])) . '">' . $this->escapeHtml(__('Check now')) . '</a>',
         ]);
 
-        return $html . '<div style="margin-top:6px;font-size:12px;color:#5b5f66">' . implode(' &middot; ', $meta) . '</div>';
+        return $html . '<div style="margin-top:6px;font-size:12px;color:#5b5f66">' . implode(' &middot; ', $meta) . '</div>'
+            . $this->siteLine($status)
+            . $this->storeMessage($status)
+            . ($status['license'] === Manager::VALID ? '' : $this->stagingCheckbox($status));
+    }
+
+    /**
+     * "This store: Live site · 1 live site + 1 staging site" and the button that moves it, when the store labels
+     * this address; nothing otherwise (a store before 1.2.61's labels, or an address the licence does not know).
+     */
+    private function siteLine(array $status): string
+    {
+        $label = $this->licenseManager->siteLabel($status);
+        if ($label === null) {
+            return '';
+        }
+        $roles = [
+            Manager::ROLE_LIVE => [self::GREEN, __('Live site'), __('This store is the live site of this license, the one that takes real orders.')],
+            Manager::ROLE_STAGING => [self::AMBER, __('Staging site'), __('This store is the staging site of this license: a private copy where you test updates, never used for real orders.')],
+            Manager::ROLE_LOCAL => [self::GREY, __('Local copy'), __('This store runs on a local address (such as localhost or a .test domain), which the license does not count.')],
+        ];
+        [$tone, $name, $about] = $roles[$label['role']];
+        $covers = $label['covers_staging'] > 0
+            ? __('%1 live site + %2 staging site', $label['covers_live'], $label['covers_staging'])
+            : __('%1 live site', $label['covers_live']);
+        $html = '<div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;line-height:1.6">'
+            . '<span>' . $this->escapeHtml(__('This store:')) . '</span>'
+            . '<span title="' . $this->escapeHtmlAttr((string)$about) . '" style="display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:12px;color:' . $tone[0] . ';background:' . $tone[1] . '">'
+            . $this->escapeHtml($name) . '</span>'
+            . '<span style="font-size:12px;color:#5b5f66">' . $this->escapeHtml($covers) . '</span></div>'
+            . '<div style="margin-top:4px;font-size:12px;color:#5b5f66">' . $this->escapeHtml($about) . '</div>';
+
+        $to = [Manager::ROLE_LIVE => Manager::ROLE_STAGING, Manager::ROLE_STAGING => Manager::ROLE_LIVE][$label['role']] ?? '';
+        if ($to !== '' && $label['covers_staging'] > 0 && $status['license'] === Manager::VALID) {
+            $url = $this->getUrl('salesigniter_common/license/siterole', [
+                'section' => $this->licenseManager->section(),
+                'role' => $to,
+                'form_key' => $this->getFormKey(),
+            ]);
+            $text = $to === Manager::ROLE_STAGING ? __('Make this the staging site') : __('Make this the live site');
+            $html .= '<div style="margin-top:8px"><a class="action-secondary" style="display:inline-block;padding:6px 14px;text-decoration:none"'
+                . ' href="' . $this->escapeUrl($url) . '">' . $this->escapeHtml($text) . '</a></div>';
+        }
+        return $html;
+    }
+
+    /** The store's own words for this key (a full key: which sites it is on and how to free one), as plain text. */
+    private function storeMessage(array $status): string
+    {
+        $message = trim((string)($status['si_message'] ?? ''));
+        return $message === '' ? ''
+            : '<div style="margin-top:8px;padding:8px 12px;border-left:3px solid #965e00;background:#fdf3e0">' . $this->escapeHtml($message) . '</div>';
+    }
+
+    /**
+     * "This is a staging site", while saving the key would activate it here. Posted with the settings form;
+     * Model\Config\Backend\LicenseKey reads it only when si_site_role_shown came with it.
+     */
+    private function stagingCheckbox(?array $status): string
+    {
+        $tick = $this->licenseManager->liveSpotTaken($status) || $this->developerMode();
+        return '<div style="margin-top:10px">'
+            . '<input type="hidden" name="si_site_role_shown" value="1">'
+            . '<label style="display:inline-flex;align-items:center;gap:6px">'
+            . '<input type="checkbox" name="si_site_staging" value="1"' . ($tick ? ' checked="checked"' : '') . '> '
+            . $this->escapeHtml(__('This is a staging site')) . '</label>'
+            . '<div style="margin-top:4px;font-size:12px;color:#5b5f66">'
+            . $this->escapeHtml(__('Tick this on a private copy of your store where you test updates, never used for real orders. Leave it unticked on your live store. It applies when you save a key.'))
+            . '</div></div>';
+    }
+
+    private function developerMode(): bool
+    {
+        try {
+            $state = $this->appState ?: \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\App\State::class);
+            // developer mode only: many live stores run in Magento's "default" mode
+            return $state->getMode() === \Magento\Framework\App\State::MODE_DEVELOPER;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     private function line(array $tone, $label, $text): string

@@ -17,10 +17,12 @@ use SalesIgniter\Common\Model\License\Manager;
 class LicenseKeyBackendTest extends TestCase
 {
     private $activated = [];
+    /** @var string[] the role asked for with each activation */
+    private $roles = [];
     private $deactivated = [];
     private $messages = [];
 
-    private function backend(string $stored): LicenseKey
+    private function backend(string $stored, ?array $posted = null): LicenseKey
     {
         $events = $this->createMock(\Magento\Framework\Event\ManagerInterface::class);
         $context = $this->createMock(\Magento\Framework\Model\Context::class);
@@ -33,8 +35,9 @@ class LicenseKeyBackendTest extends TestCase
         $encryptor->method('encrypt')->willReturnCallback(fn ($v) => 'enc:' . $v);
         $encryptor->method('decrypt')->willReturnCallback(fn ($v) => substr((string)$v, 4));
         $manager = $this->createMock(Manager::class);
-        $manager->method('activate')->willReturnCallback(function ($key) {
+        $manager->method('activate')->willReturnCallback(function ($key, $role = '') {
             $this->activated[] = $key;
+            $this->roles[] = $role;
             return ['license' => Manager::VALID, 'item_name' => 'Magento 2 Rental Booking System Pro'];
         });
         $manager->method('deactivate')->willReturnCallback(function ($key) { $this->deactivated[] = $key; });
@@ -50,10 +53,21 @@ class LicenseKeyBackendTest extends TestCase
             $encryptor,
             $manager,
             $messages,
-            $this->createMock(\Magento\Framework\Model\ResourceModel\AbstractResource::class)
+            $this->createMock(\Magento\Framework\Model\ResourceModel\AbstractResource::class),
+            null,
+            [],
+            $this->request($posted)
         );
         $backend->setPath(Manager::CONFIG_KEY)->setScope('default')->setScopeId(0);
         return $backend;
+    }
+
+    /** The settings form's request: $posted = the extra fields that came with it (null: none at all). */
+    private function request(?array $posted): \Magento\Framework\App\RequestInterface
+    {
+        $request = $this->createMock(\Magento\Framework\App\RequestInterface::class);
+        $request->method('getParam')->willReturnCallback(fn ($name) => ($posted ?? [])[$name] ?? null);
+        return $request;
     }
 
     private function save(LicenseKey $backend, string $posted): void
@@ -90,6 +104,16 @@ class LicenseKeyBackendTest extends TestCase
         $this->save($this->backend('SAMEKEY'), 'SAMEKEY');
         $this->assertSame([], $this->deactivated);
         $this->assertSame([], $this->activated);
+    }
+
+    public function testTheStagingCheckboxAsksForTheStagingSpot(): void
+    {
+        $this->save($this->backend('', ['si_site_role_shown' => '1', 'si_site_staging' => '1']), 'NEWKEY');
+        $this->save($this->backend('', ['si_site_role_shown' => '1']), 'NEWKEY2');
+        $this->save($this->backend(''), 'NEWKEY3');
+        $this->save($this->backend('', ['si_site_staging' => '1']), 'NEWKEY4');
+        $this->assertSame(['staging', 'live', '', ''], $this->roles,
+            'ticked, shown but not ticked, not shown, and a tick without the panel that showed it');
     }
 
     public function testTheMaskedValueIsNotSaved(): void

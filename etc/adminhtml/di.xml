@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- "Make this the staging / live site" (1.2.61). The rental section's licence is Common's Manager with its
+         default key path and flag; RFQ and Subscriptions register theirs on License\Refresh, which this
+         controller extends, so they reach it without a line here. -->
+    <type name="SalesIgniter\Common\Controller\Adminhtml\License\SiteRole">
+        <arguments>
+            <argument name="managers" xsi:type="array">
+                <item name="salesigniter_rental" xsi:type="object">SalesIgniter\Common\Model\License\Manager</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

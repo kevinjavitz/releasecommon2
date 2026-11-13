@@ -22,6 +22,13 @@ use Magento\Framework\Stdlib\DateTime\DateTime;
  *
  * The licence gates nothing in the extension. It is what updates are downloaded with (the
  * composer feeds check the same key), and this screen is where a shop sees it running out.
+ *
+ * Live and staging site (1.2.61): a licence sold as 1 site covers 1 live site and 1 staging site.
+ * rentalbookingsoftware.com adds `si_site_role` (this address: live, staging or local) and
+ * `si_sites` (counts and what the licence covers) to its check and activation answers, and
+ * `si_message` when it has words for the shop (a full licence). They are kept with the rest of the
+ * answer; an answer without them (a store before that change) leaves none. activate() can ask for
+ * the staging spot, markSite() moves this site between live and staging later.
  */
 class Manager
 {
@@ -41,6 +48,11 @@ class Manager
     const WRONG_PRODUCT = 'wrong_product';
     /** ours: rentalbookingsoftware.com could not be reached */
     const UNREACHABLE = 'unreachable';
+
+    /** this site's role on its licence (rentalbookingsoftware.com's labels) */
+    const ROLE_LIVE = 'live';
+    const ROLE_STAGING = 'staging';
+    const ROLE_LOCAL = 'local';
 
     private $client;
     private $flagManager;
@@ -105,12 +117,20 @@ class Manager
     /**
      * Activates $key on this site: finds its product, and activates unless EDD already counts
      * this site. Called when the key is saved.
+     *
+     * @param string $role 'staging' or 'live' when the admin said ("This is a staging site" on the
+     *                     License panel); '' asks for the staging spot only when the key's live spot
+     *                     is used by another address and the licence covers a staging site
      */
-    public function activate(string $key): array
+    public function activate(string $key, string $role = ''): array
     {
         $found = $this->identify($key);
         if (in_array($found['license'], [self::INACTIVE, self::SITE_INACTIVE], true)) {
-            $answer = $this->client->call('activate_license', $key, (int)$found['item_id'], $this->siteUrl());
+            if (!in_array($role, [self::ROLE_LIVE, self::ROLE_STAGING], true)) {
+                $role = $this->liveSpotTaken($found) ? self::ROLE_STAGING : '';
+            }
+            $answer = $this->client->call('activate_license', $key, (int)$found['item_id'], $this->siteUrl(),
+                $role !== '' ? ['si_site_role' => $role] : []);
             if ($answer === null) {
                 return $this->save($key, ['license' => self::UNREACHABLE] + $found);
             }
@@ -132,6 +152,92 @@ class Manager
             $this->client->call('deactivate_license', $key, $itemId, $this->siteUrl());
         }
         $this->flagManager->deleteFlag($this->flagCode);
+    }
+
+    /**
+     * Makes this site the live or the staging site of the configured key (the store's signed
+     * `si_site_role` action, the same request the WooCommerce plugins send).
+     *
+     * @return array result: 'live' | 'staging' (done; what the store now says) | 'no_key' |
+     *               'inactive' (not active here) | 'busy' (too many changes, try later) |
+     *               'not_supported' (the licence has no staging site) | 'unreachable' | 'failed';
+     *               status: the kept record afterwards (null without a key)
+     */
+    public function markSite(string $role): array
+    {
+        if (!in_array($role, [self::ROLE_LIVE, self::ROLE_STAGING], true)) {
+            return ['result' => 'failed', 'status' => null];
+        }
+        $key = $this->configuredKey();
+        if ($key === '') {
+            return ['result' => 'no_key', 'status' => null];
+        }
+        $status = $this->status();
+        if (!is_array($status) || ($status['license'] ?? '') !== self::VALID || empty($status['item_id'])) {
+            return ['result' => 'inactive', 'status' => $status];
+        }
+        $itemId = (int)$status['item_id'];
+        $url = $this->siteUrl();
+        $ts = (string)$this->now();
+        // rentalbookingsoftware.com checks "si_site_role:<role>\n item \n url \n si_mark \n si_versions \n ts"
+        // against an HMAC with the key; a Magento store sends no release mark or versions
+        $sig = hash_hmac('sha256', implode("\n", ['si_site_role:' . $role, (string)$itemId, $url, '', '', $ts]), $key);
+        $answer = $this->client->call('si_site_role', $key, $itemId, $url, [
+            'role' => $role,
+            'si_mark' => '',
+            'si_versions' => '',
+            'si_ts' => $ts,
+            'si_sig' => $sig,
+        ]);
+        if ($answer === null) {
+            return ['result' => self::UNREACHABLE, 'status' => $status];
+        }
+        if (empty($answer['success'])) {
+            $error = is_scalar($answer['error'] ?? null) ? (string)$answer['error'] : '';
+            $map = ['rate_limited' => 'busy', 'site_inactive' => 'inactive', 'not_supported' => 'not_supported'];
+            return ['result' => $map[$error] ?? 'failed', 'status' => $status];
+        }
+        $saved = $this->save($key, $this->fields($answer) + $status);
+        $now = (string)($saved['si_site_role'] ?? '');
+        return ['result' => in_array($now, [self::ROLE_LIVE, self::ROLE_STAGING], true) ? $now : $role, 'status' => $saved];
+    }
+
+    /** The config section this licence's key is saved in (the first part of its path): salesigniter_rental, ... */
+    public function section(): string
+    {
+        return (string)strstr($this->configPath . '/', '/', true);
+    }
+
+    /**
+     * This site's label from a kept answer: role (live | staging | local), covers_live,
+     * covers_staging; null when the store said nothing about this site.
+     */
+    public function siteLabel(?array $status): ?array
+    {
+        if (!is_array($status) || !isset($status['si_sites']) || !is_array($status['si_sites'])
+            || !in_array($status['si_site_role'] ?? '', [self::ROLE_LIVE, self::ROLE_STAGING, self::ROLE_LOCAL], true)) {
+            return null;
+        }
+        return [
+            'role' => (string)$status['si_site_role'],
+            'covers_live' => max(1, (int)($status['si_sites']['covers_live'] ?? 1)),
+            'covers_staging' => (int)($status['si_sites']['covers_staging'] ?? 0),
+        ];
+    }
+
+    /**
+     * True when the kept answer says the licence covers a staging site, its live spot is used by
+     * another address and this one is not active on it: "This is a staging site" starts ticked.
+     */
+    public function liveSpotTaken(?array $status): bool
+    {
+        if (!is_array($status) || !isset($status['si_sites']) || !is_array($status['si_sites'])) {
+            return false;
+        }
+        $sites = $status['si_sites'];
+        return (int)($sites['covers_staging'] ?? 0) > 0
+            && (int)($sites['live'] ?? 0) >= max(1, (int)($sites['covers_live'] ?? 1))
+            && ($status['si_site_role'] ?? '') === '';
     }
 
     /** The EDD renewal link for the configured key, or '' when its product is not known. */
@@ -203,12 +309,30 @@ class Manager
                 $out[$field] = $answer[$field];
             }
         }
+        if (isset($answer['si_sites']) && is_array($answer['si_sites'])) {
+            $sites = $answer['si_sites'];
+            $count = function (string $k) use ($sites): int {
+                return is_scalar($sites[$k] ?? null) ? max(0, (int)$sites[$k]) : 0;
+            };
+            $out['si_sites'] = [
+                'live' => $count('live'),
+                'staging' => $count('staging'),
+                'local' => $count('local'),
+                'covers_live' => max(1, $count('covers_live')),
+                'covers_staging' => $count('covers_staging'),
+            ];
+            $role = is_scalar($answer['si_site_role'] ?? null) ? (string)$answer['si_site_role'] : '';
+            $out['si_site_role'] = in_array($role, [self::ROLE_LIVE, self::ROLE_STAGING, self::ROLE_LOCAL], true) ? $role : '';
+            $message = is_scalar($answer['si_message'] ?? null) ? trim(strip_tags((string)$answer['si_message'])) : '';
+            $out['si_message'] = mb_substr($message, 0, 500);
+        }
         return $out;
     }
 
     /**
      * @return array license (EDD status or ours), item_id, item_name, expires ('Y-m-d H:i:s' |
-     *               'lifetime'), customer_name, license_limit, site_count, key_tail, checked_at, error
+     *               'lifetime'), customer_name, license_limit, site_count, key_tail, checked_at, error;
+     *               with a store that labels sites also si_site_role, si_sites, si_message
      */
     private function save(string $key, array $data): array
     {

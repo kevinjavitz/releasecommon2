@@ -19,6 +19,7 @@ class name, so its own code, add-ons and generated interceptors are unaffected.
 | `Model/License/{Products,Client,AccountLink,Manager}` | the EDD licence client; `Manager` takes `$configPath` / `$flagCode` constructor arguments (defaults: rental's `salesigniter_rental/license/key` and `salesigniter_rental_license`) | rental (subclasses), RFQ (virtual type with its own path and flag) |
 | `Model/Config/Backend/LicenseKey`, `Model/Config/Comment/LicenseKey`, `Block/System/Config/Form/Field/LicenseStatus` | the License settings group; the status block takes `$refreshRoute` / `$refreshParams` for its "Check now" link | rental (subclasses), RFQ |
 | `Controller/Adminhtml/License/Refresh` | `salesigniter_common/license/refresh/section/<section>`: re-checks the manager registered for that config section in its `managers` di argument | RFQ (rental keeps its own route) |
+| `Controller/Adminhtml/License/SiteRole` (1.2.61) | `salesigniter_common/license/siterole/section/<section>/role/<live\|staging>/form_key/<key>`: "Make this the staging / live site"; extends Refresh, so it gets the same `managers` (Magento merges a parent type's di arguments into its children); `etc/adminhtml/di.xml` adds the rental section's | rental, RFQ, Subscriptions |
 | `Setup/ModuleRemoval/*` | the `module:uninstall --remove-data` engine (see releaserental2's CLAUDE.md, "Uninstalling") | rental and add-ons (through rental's subclasses), RFQ |
 | `Setup/Patch/GrantsResourceAcl` | trait: grant a new ACL resource to roles that allow something matching a LIKE pattern | RFQ (rental keeps its own `GrantsRentalResourceAcl`) |
 | `Model/GraphQl/{Authorization,Pagination,DateInput}` | GraphQL helpers: ACL gate for admin/integration tokens (`assert`, `assertAny`, `isAllowed`, `isAllowedAny`), page-size/current-page validation, canonical date input | rental (subclasses; rental's `Authorization` keeps its resource constants and lists), RFQ, subscriptions |
@@ -27,7 +28,24 @@ class name, so its own code, add-ons and generated interceptors are unaffected.
 `Test/Unit/Setup/ModuleRemoval/{DbSchemaReader,SystemConfigReader}Test` read releaserental2's real
 files through the component registrar and skip where rental is not installed. 138 unit tests.
 
-## Settings search (1.2.60, pending)
+## Live and staging site (1.2.61, pending)
+
+A licence sold as 1 site covers 1 live site and 1 staging site (rentalbookingsoftware.com's si-site-roles, 2026-11-13).
+The store labels each address on a licence (live, staging, or local: not counted) and says so in its answers.
+
+| File | What |
+|---|---|
+| `Model/License/Client` | `call(..., array $extra = [])`: extra POST fields (`si_site_role`, the signed `si_site_role` action's fields) |
+| `Model/License/Manager` | keeps `si_site_role`, `si_sites` (live, staging, local, covers_live, covers_staging: ints) and `si_message` (plain text, 500 chars) from any answer that has `si_sites`; an answer without them leaves none. `activate($key, $role)`: the role the admin ticked, else `staging` when the key's live spot is used by another address and the licence covers a staging site. `markSite($role)`: the store's signed `edd_action=si_site_role` (HMAC-SHA256 with the key over `si_site_role:<role>\n<item>\n<url>\n<si_mark>\n<si_versions>\n<ts>`; Magento sends an empty mark and versions); results live, staging, no_key, inactive, busy, not_supported, unreachable, failed. `siteLabel()`, `liveSpotTaken()`, `section()` |
+| `Block/System/Config/Form/Field/LicenseStatus` | "This store: Live site" (Staging site, Local copy) with what the licence covers, the button "Make this the staging site" / "Make this the live site" (licence active, covers a staging site), the store's words (`si_message`), and while the key is not active here "This is a staging site" (hidden `si_site_role_shown` + checkbox `si_site_staging`, posted with the settings form; starts ticked when the key's live spot is used elsewhere or Magento is in developer mode, never in default mode) |
+| `Model/Config/Backend/LicenseKey` | passes the checkbox to `activate()`; the success message says "as its staging site"; a full key shows the store's own words |
+| `Controller/Adminhtml/License/SiteRole`, `etc/adminhtml/di.xml` | the button's route (above) |
+
+A store before si-site-roles sends none of these fields: the panel then looks exactly as in 1.2.60. No change to
+rental's, RFQ's or Subscriptions' own `system.xml`. Tests: `ManagerSiteRoleTest`, `SiteRoleTest`,
+`LicenseStatusSiteRoleTest`, `LicenseKeyBackendTest` (role). Phrases: 22 in `i18n/en_US.csv`.
+
+## Settings search (1.2.60)
 
 A "Find a setting" box on top of every section of the `salesigniter` config tab (Stores > Configuration: Rental,
 Request for Quote, Subscriptions, whatever the store has). It filters the page as the admin types: matching settings
@@ -62,7 +80,7 @@ timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpun
 
 The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
 1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58 (403 in `Test/Unit` with 1.2.59's
-command fix; 434 with 1.2.60's settings search), no database. The sub-module tests skip
+command fix; 434 with 1.2.60's settings search; 457 with 1.2.61's live and staging site), no database. The sub-module tests skip
 where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
 the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
 
