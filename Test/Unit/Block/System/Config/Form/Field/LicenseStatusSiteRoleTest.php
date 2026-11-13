@@ -95,7 +95,7 @@ class LicenseStatusSiteRoleTest extends TestCase
         return $block->panelHtml($this->createMock(AbstractElement::class));
     }
 
-    private static function status(string $license, array $more = []): array
+    private static function record(string $license, array $more = []): array
     {
         return $more + ['license' => $license, 'item_id' => 32867, 'item_name' => 'Magento 2 Rental Booking System Pro',
             'expires' => 'lifetime', 'license_limit' => 2, 'site_count' => 1, 'key_tail' => '6789', 'checked_at' => 1790121600];
@@ -103,7 +103,7 @@ class LicenseStatusSiteRoleTest extends TestCase
 
     private static function labelled(string $role, int $coversStaging = 1, string $license = Manager::VALID): array
     {
-        return self::status($license, ['si_site_role' => $role,
+        return self::record($license, ['si_site_role' => $role,
             'si_sites' => ['live' => 1, 'staging' => 0, 'local' => 0, 'covers_live' => 1, 'covers_staging' => $coversStaging]]);
     }
 
@@ -139,7 +139,7 @@ class LicenseStatusSiteRoleTest extends TestCase
 
     public function testAStoreWithoutLabelsShowsThePanelAsBefore(): void
     {
-        $html = $this->html(self::status(Manager::VALID));
+        $html = $this->html(self::record(Manager::VALID));
         $this->assertStringNotContainsString('This store:', $html);
         $this->assertStringNotContainsString('siterole', $html);
         $this->assertStringNotContainsString('si_site_staging', $html);
@@ -148,7 +148,7 @@ class LicenseStatusSiteRoleTest extends TestCase
 
     public function testTheCheckboxShowsUntilTheKeyIsActiveHere(): void
     {
-        foreach ([null, self::status(Manager::SITE_INACTIVE), self::status('no_activations_left')] as $status) {
+        foreach ([null, self::record(Manager::SITE_INACTIVE), self::record('no_activations_left')] as $status) {
             $html = $this->html($status);
             $this->assertStringContainsString('<input type="hidden" name="si_site_role_shown" value="1">', $html);
             $this->assertStringContainsString('name="si_site_staging" value="1">', $html, 'unticked');
@@ -158,7 +158,7 @@ class LicenseStatusSiteRoleTest extends TestCase
 
     public function testTheCheckboxStartsTickedWhenTheLiveSpotIsUsedOrInDeveloperMode(): void
     {
-        $taken = self::status(Manager::SITE_INACTIVE, ['si_site_role' => '',
+        $taken = self::record(Manager::SITE_INACTIVE, ['si_site_role' => '',
             'si_sites' => ['live' => 1, 'staging' => 0, 'local' => 0, 'covers_live' => 1, 'covers_staging' => 1]]);
         $this->assertStringContainsString('value="1" checked="checked">', $this->html($taken));
         $this->assertStringContainsString('value="1" checked="checked">', $this->html(null, State::MODE_DEVELOPER));
@@ -167,7 +167,7 @@ class LicenseStatusSiteRoleTest extends TestCase
 
     public function testTheStoresOwnWordsAreShownAsText(): void
     {
-        $html = $this->html(self::status('no_activations_left', ['si_message' => 'In use on shop.example.org & <b>1</b> more.']));
+        $html = $this->html(self::record('no_activations_left', ['si_message' => 'In use on shop.example.org & <b>1</b> more.']));
         $this->assertStringContainsString('In use on shop.example.org &amp; &lt;b&gt;1&lt;/b&gt; more.', $html);
     }
 }
