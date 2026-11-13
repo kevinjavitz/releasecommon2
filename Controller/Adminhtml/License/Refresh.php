@@ -20,8 +20,8 @@ class Refresh extends Action implements HttpGetActionInterface
 {
     public const ADMIN_RESOURCE = 'Magento_Config::config';
 
-    /** @var array<string, Manager> */
-    private array $managers = [];
+    /** @var array<string, Manager> keyed by config section id (SiteRole inherits the same list) */
+    protected array $managers = [];
 
     /**
      * @param Manager[] $managers keyed by config section id

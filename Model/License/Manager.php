@@ -202,6 +202,12 @@ class Manager
         return ['result' => in_array($now, [self::ROLE_LIVE, self::ROLE_STAGING], true) ? $now : $role, 'status' => $saved];
     }
 
+    /** The config section this licence's key is saved in (the first part of its path): salesigniter_rental, ... */
+    public function section(): string
+    {
+        return (string)strstr($this->configPath . '/', '/', true);
+    }
+
     /**
      * This site's label from a kept answer: role (live | staging | local), covers_live,
      * covers_staging; null when the store said nothing about this site.
