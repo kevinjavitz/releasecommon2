@@ -80,7 +80,7 @@ timeout 900 ddev exec php -d memory_limit=2G vendor/bin/phpunit -c .claude/phpun
 
 The site's capped config (Magento's `dev/tests/unit/phpunit.xml.dist` sets memory_limit=-1). 138 unit tests in
 1.2.57; 398 in `Test/Unit` and 72 in `SubModules/*/Test/Unit` in 1.2.58 (403 in `Test/Unit` with 1.2.59's
-command fix; 434 with 1.2.60's settings search), no database. The sub-module tests skip
+command fix; 434 with 1.2.60's settings search; 457 with 1.2.61's live and staging site), no database. The sub-module tests skip
 where their gateway is not installed (magesubscriptions has all five). **Judge by the `OK` / `FAILURES` line, not
 the exit status** (configs with the Allure bootstrap end every run with a warning that alone makes the status 1).
 
